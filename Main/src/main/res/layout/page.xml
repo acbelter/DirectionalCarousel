@@ -1,31 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:gravity="center">
+<com.acbelter.directionalcarousel.PageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@android:color/transparent">
 
-    <com.acbelter.directionalcarousel.PageLayout
-        android:id="@+id/root"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="@dimen/content_width"
+        android:layout_height="@dimen/content_height"
+        android:textSize="20sp"
+        tools:text="Title"
         android:gravity="center"
-        android:background="@android:color/transparent">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            tools:text="Title"/>
-
-        <Button
-            android:id="@+id/content"
-            android:layout_width="190dp"
-            android:layout_height="120dp"
-            android:background="@android:color/black"/>
-    </com.acbelter.directionalcarousel.PageLayout>
-</LinearLayout>
+        android:background="@drawable/item_selector"
+        android:clickable="true"/>
+</com.acbelter.directionalcarousel.PageLayout>

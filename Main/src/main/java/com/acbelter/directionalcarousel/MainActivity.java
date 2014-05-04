@@ -5,17 +5,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
 import fr.castorflex.android.verticalviewpager.VerticalViewPager;
 
 public class MainActivity extends FragmentActivity {
-    public final static int PAGES = 5;
-    // You can choose a bigger number for LOOPS, but you know, nobody will fling
-    // more than 10000 times just in order to test your "infinite" ViewPager :D
-    public final static int LOOPS = 10000;
-    public final static int FIRST_PAGE = PAGES * LOOPS / 2;
-    public final static float BIG_SCALE = 1.0f;
-    public final static float SMALL_SCALE = 0.7f;
-    public final static float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
+    private static final int HORIZONTAL_PAGER = 0;
+    private static final int VERTICAL_PAGER = 1;
+    private static final int NULL_PAGER = -1;
 
     private CarouselPagerAdapter mPagerAdapter;
     private ViewPager mHorizontalPager;
@@ -25,23 +22,56 @@ public class MainActivity extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initPager();
+
+        final int size = 5;
+        ArrayList<PageItem> items = new ArrayList<PageItem>(size);
+        for (int i = 0; i < size; i++) {
+            items.add(new PageItem("Item " + i));
+        }
+
+        mPagerAdapter = new CarouselPagerAdapter(this, getSupportFragmentManager(), items);
+
+        if (savedInstanceState != null) {
+            int pos = savedInstanceState.getInt("position");
+            initPager(mPagerAdapter, pos);
+        } else {
+            initPager(mPagerAdapter, mPagerAdapter.getFirstPage());
+        }
     }
 
-    private void initPager() {
-        mPagerAdapter = new CarouselPagerAdapter(this, getSupportFragmentManager());
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (getPagerType() == HORIZONTAL_PAGER) {
+            outState.putInt("position", mHorizontalPager.getCurrentItem());
+        } else if (getPagerType() == VERTICAL_PAGER) {
+            outState.putInt("position", mVerticalPager.getCurrentItem());
+        } else {
+            outState.putInt("position", mPagerAdapter.getFirstPage());
+        }
+    }
 
+    private int getPagerType() {
+        if (mHorizontalPager != null && mVerticalPager == null) {
+            return HORIZONTAL_PAGER;
+        }
+        if (mVerticalPager != null && mHorizontalPager == null) {
+            return VERTICAL_PAGER;
+        }
+        return NULL_PAGER;
+    }
+
+    private void initPager(CarouselPagerAdapter adapter, int savedPosition) {
         mHorizontalPager = (ViewPager) findViewById(R.id.horizontal_pager);
         mVerticalPager = (VerticalViewPager) findViewById(R.id.vertical_pager);
 
-        if (mHorizontalPager != null && mVerticalPager == null) {
-            mHorizontalPager.setAdapter(mPagerAdapter);
-            mHorizontalPager.setOnPageChangeListener(mPagerAdapter);
-
+        if (getPagerType() == HORIZONTAL_PAGER) {
+            mHorizontalPager.setAdapter(adapter);
+            mHorizontalPager.setOnPageChangeListener(adapter);
 
             // Set current item to the middle page so we can fling to both
             // directions left and right
-            mHorizontalPager.setCurrentItem(FIRST_PAGE);
+            mHorizontalPager.setCurrentItem(savedPosition);
 
             // Necessary or the pager will only have one extra page to show
             // make this at least however many pages you can see
@@ -50,16 +80,13 @@ public class MainActivity extends FragmentActivity {
             // Set margin for pages as a negative number, so a part of next and
             // previous pages will be showed
             mHorizontalPager.setPageMargin(-300);
-        }
-
-        if (mVerticalPager != null && mHorizontalPager == null) {
-            mVerticalPager.setAdapter(mPagerAdapter);
-            mVerticalPager.setOnPageChangeListener(mPagerAdapter);
-
+        } else if (getPagerType() == VERTICAL_PAGER) {
+            mVerticalPager.setAdapter(adapter);
+            mVerticalPager.setOnPageChangeListener(adapter);
 
             // Set current item to the middle page so we can fling to both
             // directions left and right
-            mVerticalPager.setCurrentItem(FIRST_PAGE);
+            mVerticalPager.setCurrentItem(savedPosition);
 
             // Necessary or the pager will only have one extra page to show
             // make this at least however many pages you can see
@@ -72,10 +99,9 @@ public class MainActivity extends FragmentActivity {
     }
 
     public ViewGroup getPager() {
-        if (mHorizontalPager != null && mVerticalPager == null) {
+        if (getPagerType() == HORIZONTAL_PAGER) {
             return mHorizontalPager;
-        }
-        if (mVerticalPager != null && mHorizontalPager == null) {
+        } else if (getPagerType() == VERTICAL_PAGER) {
             return mVerticalPager;
         }
         return null;

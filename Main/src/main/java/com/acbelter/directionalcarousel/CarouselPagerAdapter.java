@@ -5,34 +5,50 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import java.util.ArrayList;
+
 public class CarouselPagerAdapter extends FragmentPagerAdapter implements
         ViewPager.OnPageChangeListener {
+    // You can choose a bigger number for LOOPS, but you know, nobody will fling
+    // more than 10000 times just in order to test your "infinite" ViewPager :D
+    private static final int LOOPS = 10000;
+    public static final float BIG_SCALE = 1.0f;
+    public static final float SMALL_SCALE = 0.7f;
+    private static final float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
+
+    private int mPages;
+    private int mFirstPage;
+
     private MainActivity mContext;
     private FragmentManager mFragmentManager;
+    private ArrayList<PageItem> mItems;
 
-    public CarouselPagerAdapter(MainActivity context, FragmentManager fragmentManager) {
+    public CarouselPagerAdapter(MainActivity context,
+                                FragmentManager fragmentManager,
+                                ArrayList<PageItem> items) {
         super(fragmentManager);
-        mFragmentManager = fragmentManager;
         mContext = context;
+        mFragmentManager = fragmentManager;
+        if (items == null) {
+            mItems = new ArrayList<PageItem>(0);
+        } else {
+            mItems = items;
+        }
+        mPages = mItems.size();
+        mFirstPage = mPages * LOOPS / 2;
     }
 
     @Override
     public Fragment getItem(int position) {
         // Make the first pager bigger than others
-        float scale;
-        if (position == MainActivity.FIRST_PAGE) {
-            scale = MainActivity.BIG_SCALE;
-        } else {
-            scale = MainActivity.SMALL_SCALE;
-        }
-
-        position = position % MainActivity.PAGES;
-        return PageFragment.newInstance(mContext, position, scale);
+        float scale = (position == mFirstPage) ? BIG_SCALE : SMALL_SCALE;
+        position = position % mPages;
+        return PageFragment.newInstance(mContext, mItems.get(position), scale);
     }
 
     @Override
     public int getCount() {
-        return MainActivity.PAGES * MainActivity.LOOPS;
+        return mPages * LOOPS;
     }
 
     @Override
@@ -40,12 +56,12 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
                                int positionOffsetPixels) {
         if (positionOffset >= 0.0f && positionOffset <= 1.0f) {
             PageLayout current = getRootView(position);
-            PageLayout mNext = getRootView(position + 1);
+            PageLayout next = getRootView(position + 1);
+            PageLayout prev = getRootView(position - 1);
 
-            current.setScaleBoth(MainActivity.BIG_SCALE
-                    - MainActivity.DIFF_SCALE * positionOffset);
-            mNext.setScaleBoth(MainActivity.SMALL_SCALE
-                    + MainActivity.DIFF_SCALE * positionOffset);
+            current.setScaleBoth(BIG_SCALE - DIFF_SCALE * positionOffset);
+            next.setScaleBoth(SMALL_SCALE + DIFF_SCALE * positionOffset);
+            prev.setScaleBoth(SMALL_SCALE + DIFF_SCALE * positionOffset);
         }
     }
 
@@ -55,6 +71,10 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
 
     @Override
     public void onPageScrollStateChanged(int state) {
+    }
+
+    public int getFirstPage() {
+        return mFirstPage;
     }
 
     private PageLayout getRootView(int position) {

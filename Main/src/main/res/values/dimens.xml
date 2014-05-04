@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <dimen name="content_width">190dp</dimen>
+    <dimen name="content_height">120dp</dimen>
+</resources>

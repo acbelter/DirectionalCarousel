@@ -10,9 +10,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class PageFragment extends Fragment {
-    public static Fragment newInstance(Context context, int pos, float scale) {
+    public static Fragment newInstance(Context context, PageItem item, float scale) {
         Bundle args = new Bundle();
-        args.putInt("pos", pos);
+        args.putParcelable("item", item);
         args.putFloat("scale", scale);
         return Fragment.instantiate(context, PageFragment.class.getName(), args);
     }
@@ -26,11 +26,11 @@ public class PageFragment extends Fragment {
 
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.page, container, false);
 
-        int pos = getArguments().getInt("pos");
+        PageItem item = getArguments().getParcelable("item");
         float scale = getArguments().getFloat("scale");
 
         TextView title = (TextView) layout.findViewById(R.id.title);
-        title.setText("Item " + pos);
+        title.setText(item.getTitle());
 
         PageLayout root = (PageLayout) layout.findViewById(R.id.root);
         root.setScaleBoth(scale);

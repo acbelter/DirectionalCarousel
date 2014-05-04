@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
 public class PageLayout extends LinearLayout {
-    private float mScale = MainActivity.BIG_SCALE;
+    private float mScale = CarouselPagerAdapter.BIG_SCALE;
 
     public PageLayout(Context context) {
         super(context);
