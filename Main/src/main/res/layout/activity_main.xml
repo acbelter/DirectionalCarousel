@@ -4,23 +4,25 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 tools:context=".MainActivity">
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"/>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/horizontal_pager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never"/>
+    <com.acbelter.directionalcarousel.CarouselViewPager
+        android:id="@+id/carousel_pager"
+        android:layout_width="250dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:overScrollMode="never"
+        android:background="@drawable/border"/>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"/>
 </LinearLayout>

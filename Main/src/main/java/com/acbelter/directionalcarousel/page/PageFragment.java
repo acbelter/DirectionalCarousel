@@ -1,4 +1,4 @@
-package com.acbelter.directionalcarousel;
+package com.acbelter.directionalcarousel.page;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.acbelter.directionalcarousel.CarouselViewPager;
+import com.acbelter.directionalcarousel.R;
 
 public class PageFragment extends Fragment {
     public static Fragment newInstance(Context context, PageItem item, float scale) {
@@ -34,6 +37,12 @@ public class PageFragment extends Fragment {
 
         PageLayout root = (PageLayout) layout.findViewById(R.id.root);
         root.setScaleBoth(scale);
+
+        if (CarouselViewPager.ORIENTATION == CarouselViewPager.VERTICAL) {
+            layout.setScaleX(1.0f / CarouselViewPager.scaleY);
+            layout.setScaleY(1.0f / CarouselViewPager.scaleX);
+            layout.setRotation(-90);
+        }
 
         return layout;
     }

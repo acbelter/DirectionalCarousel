@@ -1,19 +1,18 @@
-package com.acbelter.directionalcarousel;
+package com.acbelter.directionalcarousel.page;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
+import com.acbelter.directionalcarousel.CarouselPagerAdapter;
+
 public class PageLayout extends LinearLayout {
     private float mScale = CarouselPagerAdapter.BIG_SCALE;
 
-    public PageLayout(Context context) {
-        super(context);
-    }
-
     public PageLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setWillNotDraw(false);
     }
 
     public void setScaleBoth(float scale) {

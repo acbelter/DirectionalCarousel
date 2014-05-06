@@ -1,9 +1,14 @@
 package com.acbelter.directionalcarousel;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+
+import com.acbelter.directionalcarousel.page.PageFragment;
+import com.acbelter.directionalcarousel.page.PageItem;
+import com.acbelter.directionalcarousel.page.PageLayout;
 
 import java.util.ArrayList;
 
@@ -14,21 +19,25 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
     private static final int LOOPS = 10000;
     public static final float BIG_SCALE = 1.0f;
     public static final float SMALL_SCALE = 0.7f;
-    private static final float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
+    //public static final float SMALL_SCALE = 1.0f;
+    public static final float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
 
     private int mPages;
     private int mFirstPage;
 
-    private MainActivity mContext;
+    private Context mContext;
     private FragmentManager mFragmentManager;
     private ArrayList<PageItem> mItems;
+    private int mPagerId;
 
-    public CarouselPagerAdapter(MainActivity context,
+    public CarouselPagerAdapter(Context context,
                                 FragmentManager fragmentManager,
+                                int pagerId,
                                 ArrayList<PageItem> items) {
         super(fragmentManager);
         mContext = context;
         mFragmentManager = fragmentManager;
+        mPagerId = pagerId;
         if (items == null) {
             mItems = new ArrayList<PageItem>(0);
         } else {
@@ -60,8 +69,12 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
             PageLayout prev = getRootView(position - 1);
 
             current.setScaleBoth(BIG_SCALE - DIFF_SCALE * positionOffset);
-            next.setScaleBoth(SMALL_SCALE + DIFF_SCALE * positionOffset);
-            prev.setScaleBoth(SMALL_SCALE + DIFF_SCALE * positionOffset);
+            if (next != null) {
+                next.setScaleBoth(SMALL_SCALE + DIFF_SCALE * positionOffset);
+            }
+            if (prev != null) {
+                prev.setScaleBoth(SMALL_SCALE + DIFF_SCALE * positionOffset);
+            }
         }
     }
 
@@ -79,10 +92,13 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
 
     private PageLayout getRootView(int position) {
         Fragment f = mFragmentManager.findFragmentByTag(getFragmentTag(position));
-        return (PageLayout) f.getView().findViewById(R.id.root);
+        if (f != null && f.getView() != null) {
+            return (PageLayout) f.getView().findViewById(R.id.root);
+        }
+        return null;
     }
 
     private String getFragmentTag(int position) {
-        return "android:switcher:" + mContext.getPager().getId() + ":" + position;
+        return "android:switcher:" + mPagerId + ":" + position;
     }
 }

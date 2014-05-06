@@ -1,4 +1,4 @@
-package com.acbelter.directionalcarousel;
+package com.acbelter.directionalcarousel.page;
 
 import android.os.Parcel;
 import android.os.Parcelable;
