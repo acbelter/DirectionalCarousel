@@ -23,24 +23,10 @@ public class MainActivity extends FragmentActivity {
         }
 
         mViewPager = (CarouselViewPager) findViewById(R.id.carousel_pager);
-        mPagerAdapter = new CarouselPagerAdapter(this, getSupportFragmentManager(),
-                mViewPager.getId(), items);
-
-        int pos;
-        if (savedInstanceState != null) {
-            pos = savedInstanceState.getInt("position");
-        } else {
-            pos = mPagerAdapter.getFirstPage();
-        }
+        mPagerAdapter = new CarouselPagerAdapter(getSupportFragmentManager(), items);
 
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.setOnPageChangeListener(mPagerAdapter);
-        mViewPager.setCurrentItem(pos);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("position", mViewPager.getCurrentItem());
+        mViewPager.setCurrentItem(mPagerAdapter.getFirstPage());
     }
 }

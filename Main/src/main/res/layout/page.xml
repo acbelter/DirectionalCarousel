@@ -9,13 +9,19 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="@dimen/content_width"
-        android:layout_height="@dimen/content_height"
-        android:textSize="20sp"
-        tools:text="Title"
+    <LinearLayout
+        android:id="@+id/page_content"
+        android:layout_width="@dimen/page_content_width"
+        android:layout_height="@dimen/page_content_height"
         android:gravity="center"
-        android:background="@drawable/item_selector"
-        android:clickable="true"/>
+        android:background="@drawable/item_selector">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="20sp"
+            android:gravity="center"
+            tools:text="Title"/>
+    </LinearLayout>
 </com.acbelter.directionalcarousel.page.PageLayout>

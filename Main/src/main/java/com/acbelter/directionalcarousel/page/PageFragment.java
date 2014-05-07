@@ -1,6 +1,5 @@
 package com.acbelter.directionalcarousel.page;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,15 +8,19 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.acbelter.directionalcarousel.CarouselConfig;
 import com.acbelter.directionalcarousel.CarouselViewPager;
 import com.acbelter.directionalcarousel.R;
 
 public class PageFragment extends Fragment {
-    public static Fragment newInstance(Context context, PageItem item, float scale) {
+
+    public static PageFragment newInstance(PageItem item, float scale) {
+        PageFragment pf = new PageFragment();
         Bundle args = new Bundle();
         args.putParcelable("item", item);
         args.putFloat("scale", scale);
-        return Fragment.instantiate(context, PageFragment.class.getName(), args);
+        pf.setArguments(args);
+        return pf;
     }
 
     @Override
@@ -38,9 +41,10 @@ public class PageFragment extends Fragment {
         PageLayout root = (PageLayout) layout.findViewById(R.id.root);
         root.setScaleBoth(scale);
 
-        if (CarouselViewPager.ORIENTATION == CarouselViewPager.VERTICAL) {
-            layout.setScaleX(1.0f / CarouselViewPager.scaleY);
-            layout.setScaleY(1.0f / CarouselViewPager.scaleX);
+        CarouselConfig config = CarouselViewPager.getConfig();
+        if (config.orientation == CarouselConfig.VERTICAL) {
+            layout.setScaleX(1.0f / config.scaleY);
+            layout.setScaleY(1.0f / config.scaleX);
             layout.setRotation(-90);
         }
 
