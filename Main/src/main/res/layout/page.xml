@@ -11,7 +11,7 @@
 
     <LinearLayout
         android:id="@+id/page_content"
-        android:layout_width="@dimen/page_content_height"
+        android:layout_width="@dimen/page_content_width"
         android:layout_height="@dimen/page_content_height"
         android:gravity="center"
         android:background="@drawable/item_selector">

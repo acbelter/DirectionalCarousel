@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <dimen name="page_content_width">190dp</dimen>
+    <dimen name="page_content_width">120dp</dimen>
     <dimen name="page_content_height">120dp</dimen>
 </resources>

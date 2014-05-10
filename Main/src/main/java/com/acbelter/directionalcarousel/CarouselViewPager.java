@@ -12,7 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 public class CarouselViewPager extends ViewPager {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "CarouselViewPager";
 
     private int mViewPagerWidth;
@@ -104,11 +104,10 @@ public class CarouselViewPager extends ViewPager {
         }
     }
 
-    // FIXME
     private void calculatePageLimitAndMargin() throws CarouselConfigException {
         if (mConfig.orientation != CarouselConfig.HORIZONTAL
                 && mConfig.orientation != CarouselConfig.VERTICAL) {
-            throw new IllegalArgumentException("Invalid orientation.");
+            throw new IllegalArgumentException("Invalid orientation value.");
         }
 
         int contentSize, viewSize;

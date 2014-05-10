@@ -48,8 +48,10 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
         PageLayout current = getRootView(position);
         PageLayout next = getRootView(position + 1);
 
-        current.setScaleBoth(CarouselConfig.BIG_SCALE
-                - CarouselConfig.DIFF_SCALE * positionOffset);
+        if (current != null) {
+            current.setScaleBoth(CarouselConfig.BIG_SCALE
+                    - CarouselConfig.DIFF_SCALE * positionOffset);
+        }
 
         if (next != null) {
             next.setScaleBoth(CarouselConfig.SMALL_SCALE
@@ -59,7 +61,7 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
 
     @Override
     public void onPageSelected(int position) {
-        // For fix scale bug
+        // Fix fast scroll scaling bug
         int scalingPages = CarouselConfig.getInstance().pageLimit;
         if (scalingPages == 0) {
             return;
