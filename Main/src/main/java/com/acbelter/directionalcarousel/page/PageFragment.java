@@ -7,9 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.acbelter.directionalcarousel.CarouselConfig;
-import com.acbelter.directionalcarousel.CarouselViewPager;
 import com.acbelter.directionalcarousel.R;
 
 public class PageFragment extends Fragment {
@@ -41,7 +39,7 @@ public class PageFragment extends Fragment {
         PageLayout root = (PageLayout) layout.findViewById(R.id.root);
         root.setScaleBoth(scale);
 
-        CarouselConfig config = CarouselViewPager.getConfig();
+        CarouselConfig config = CarouselConfig.getInstance();
         if (config.orientation == CarouselConfig.VERTICAL) {
             layout.setScaleX(1.0f / config.scaleY);
             layout.setScaleY(1.0f / config.scaleX);

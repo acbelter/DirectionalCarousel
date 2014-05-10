@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 public class CarouselViewPager extends ViewPager {
+    private static final boolean DEBUG = true;
     private static final String TAG = "CarouselViewPager";
 
     private int mViewPagerWidth;
@@ -24,13 +25,12 @@ public class CarouselViewPager extends ViewPager {
     private int mPageMargin;
 
     private Resources mResources;
-    // FIXME It is static field because ViewPager cache own pages
-    private static CarouselConfig sConfig = new CarouselConfig();
+    private CarouselConfig mConfig;
 
     public CarouselViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        sConfig.pagerId = getId();
+        mConfig = CarouselConfig.getInstance();
+        mConfig.pagerId = getId();
         mResources = context.getResources();
 
         DisplayMetrics metrics = mResources.getDisplayMetrics();
@@ -39,7 +39,7 @@ public class CarouselViewPager extends ViewPager {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarouselViewPager);
         try {
             if (a != null) {
-                sConfig.orientation = a.getInt(R.styleable.CarouselViewPager_android_orientation,
+                mConfig.orientation = a.getInt(R.styleable.CarouselViewPager_android_orientation,
                         CarouselConfig.HORIZONTAL);
             }
         } finally {
@@ -47,10 +47,6 @@ public class CarouselViewPager extends ViewPager {
                 a.recycle();
             }
         }
-    }
-
-    public static CarouselConfig getConfig() {
-        return sConfig;
     }
 
     @Override
@@ -83,12 +79,12 @@ public class CarouselViewPager extends ViewPager {
         mViewPagerWidth = MeasureSpec.getSize(widthMeasureSpec);
         mViewPagerHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (sConfig.orientation == CarouselConfig.VERTICAL) {
+        if (mConfig.orientation == CarouselConfig.VERTICAL) {
             setRotation(90);
-            sConfig.scaleX = (float) mViewPagerHeight / mViewPagerWidth;
-            sConfig.scaleY = (float) mViewPagerWidth / mViewPagerHeight;
-            setScaleX(sConfig.scaleX);
-            setScaleY(sConfig.scaleY);
+            mConfig.scaleX = (float) mViewPagerHeight / mViewPagerWidth;
+            mConfig.scaleY = (float) mViewPagerWidth / mViewPagerHeight;
+            setScaleX(mConfig.scaleX);
+            setScaleY(mConfig.scaleY);
         }
 
         setMeasuredDimension(mViewPagerWidth, mViewPagerHeight);
@@ -102,16 +98,21 @@ public class CarouselViewPager extends ViewPager {
         setOffscreenPageLimit(mPageLimit);
         setPageMargin(mPageMargin);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (DEBUG) {
+            Log.d(TAG, mConfig.toString());
+        }
     }
 
+    // FIXME
     private void calculatePageLimitAndMargin() throws CarouselConfigException {
-        if (sConfig.orientation != CarouselConfig.HORIZONTAL
-                && sConfig.orientation != CarouselConfig.VERTICAL) {
+        if (mConfig.orientation != CarouselConfig.HORIZONTAL
+                && mConfig.orientation != CarouselConfig.VERTICAL) {
             throw new IllegalArgumentException("Invalid orientation.");
         }
 
         int contentSize, viewSize;
-        if (sConfig.orientation == CarouselConfig.HORIZONTAL) {
+        if (mConfig.orientation == CarouselConfig.HORIZONTAL) {
             contentSize = mResources.getDimensionPixelSize(R.dimen.page_content_width);
             viewSize = mViewPagerWidth;
         } else {
@@ -149,13 +150,16 @@ public class CarouselViewPager extends ViewPager {
         } else {
             mPageLimit = fullPages - 1;
         }
-        sConfig.visiblePages = mPageLimit + 1;
+        // Reserve pages for correct scrolling
+        mPageLimit *= 2;
+        mConfig.pageLimit = mPageLimit;
 
-        if (sConfig.orientation == CarouselConfig.VERTICAL) {
-            mPageMargin = -(int) ((viewSize - contentSize - offset) * sConfig.scaleY);
+        if (mConfig.orientation == CarouselConfig.VERTICAL) {
+            mPageMargin = -(int) ((viewSize - contentSize - offset) * mConfig.scaleY);
         } else {
             mPageMargin = -(viewSize - contentSize - offset);
         }
+        mConfig.pageMargin = mPageMargin;
     }
 
     public static class CarouselConfigException extends Exception {

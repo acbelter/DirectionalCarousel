@@ -2,5 +2,7 @@
 <resources>
     <declare-styleable name="CarouselViewPager">
         <attr name="android:orientation"/>
+        <attr name="infinite" format="boolean"/>
+        <attr name="scrollScaling" format="boolean"/>
     </declare-styleable>
 </resources>

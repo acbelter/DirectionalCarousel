@@ -19,16 +19,27 @@ public class CarouselConfig implements Parcelable {
     public float scaleY = 1.0f;
 
     public int orientation = CarouselConfig.HORIZONTAL;
-    public int visiblePages = 0;
+    public int pageMargin = 0;
+    public int pageLimit = 0;
     public int pagerId = View.NO_ID;
 
-    public CarouselConfig() {}
+    private static CarouselConfig sConfig;
+
+    public static CarouselConfig getInstance() {
+        if (sConfig == null) {
+            sConfig = new CarouselConfig();
+        }
+        return sConfig;
+    }
+
+    private CarouselConfig() {}
 
     private CarouselConfig(Parcel in) {
         scaleX = in.readFloat();
         scaleY = in.readFloat();
         orientation = in.readInt();
-        visiblePages = in.readInt();
+        pageMargin = in.readInt();
+        pageLimit = in.readInt();
         pagerId = in.readInt();
     }
 
@@ -55,7 +66,8 @@ public class CarouselConfig implements Parcelable {
         out.writeFloat(scaleX);
         out.writeFloat(scaleY);
         out.writeInt(orientation);
-        out.writeInt(visiblePages);
+        out.writeInt(pageMargin);
+        out.writeInt(pageLimit);
         out.writeInt(pagerId);
     }
 
@@ -66,7 +78,7 @@ public class CarouselConfig implements Parcelable {
     @Override
     public String toString() {
         return "scaleX=" + scaleX + " scaleY=" + scaleY +
-                " orientation=" + orientation + " visiblePages" + visiblePages +
-                " pagerId=" + pagerId;
+                " orientation=" + orientation + " pageMargin=" + pageMargin +
+                " pageLimit=" + pageLimit + " pagerId=" + pagerId;
     }
 }

@@ -2,7 +2,6 @@ package com.acbelter.directionalcarousel;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-
 import com.acbelter.directionalcarousel.page.PageItem;
 
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final int size = 5;
+        final int size = 100;
         ArrayList<PageItem> items = new ArrayList<PageItem>(size);
         for (int i = 0; i < size; i++) {
             items.add(new PageItem("Item " + i));

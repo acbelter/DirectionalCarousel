@@ -4,7 +4,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-
 import com.acbelter.directionalcarousel.page.PageFragment;
 import com.acbelter.directionalcarousel.page.PageItem;
 import com.acbelter.directionalcarousel.page.PageLayout;
@@ -34,11 +33,8 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
 
     @Override
     public Fragment getItem(int position) {
-        // Make the first pager bigger than others
-        float scale = (position == mFirstPage) ?
-                CarouselConfig.BIG_SCALE : CarouselConfig.SMALL_SCALE;
         position = position % mPages;
-        return PageFragment.newInstance(mItems.get(position), scale);
+        return PageFragment.newInstance(mItems.get(position), CarouselConfig.SMALL_SCALE);
     }
 
     @Override
@@ -47,49 +43,43 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
     }
 
     @Override
-    public void onPageScrolled(int position, float positionOffset,
+    public void onPageScrolled(final int position, final float positionOffset,
                                int positionOffsetPixels) {
-        if (positionOffset >= 0.0f && positionOffset <= 1.0f) {
-//            int n = CarouselViewPager.getConfig().visiblePages;
-//            if (n != 0) {
-//                n--;
-//            }
+        PageLayout current = getRootView(position);
+        PageLayout next = getRootView(position + 1);
 
-            // FIXME Fix scaling while scrolling
-            PageLayout current = getRootView(position);
-            current.setScaleBoth(CarouselConfig.BIG_SCALE -
-                    CarouselConfig.DIFF_SCALE * positionOffset);
+        current.setScaleBoth(CarouselConfig.BIG_SCALE
+                - CarouselConfig.DIFF_SCALE * positionOffset);
 
-//            ArrayList<PageLayout> neighbors = new ArrayList<PageLayout>(n/2);
-//            for (int i = 0; i < n/2; i++) {
-//                neighbors.add(getRootView(position + i));
-//                neighbors.add(getRootView(position - i));
-//            }
-            PageLayout next = getRootView(position + 1);
-            PageLayout prev = getRootView(position - 1);
-
-            current.setScaleBoth(CarouselConfig.BIG_SCALE -
-                    CarouselConfig.DIFF_SCALE * positionOffset);
-            if (next != null) {
-                next.setScaleBoth(CarouselConfig.SMALL_SCALE +
-                        CarouselConfig.DIFF_SCALE * positionOffset);
-            }
-            if (prev != null) {
-                prev.setScaleBoth(CarouselConfig.SMALL_SCALE +
-                        CarouselConfig.DIFF_SCALE * positionOffset);
-            }
-
-//            for (int i = 0; i < neighbors.size(); i++) {
-//                if (neighbors.get(i) != null) {
-//                    neighbors.get(i).setScaleBoth(CarouselConfig.SMALL_SCALE +
-//                            CarouselConfig.DIFF_SCALE * positionOffset);
-//                }
-//            }
+        if (next != null) {
+            next.setScaleBoth(CarouselConfig.SMALL_SCALE
+                    + CarouselConfig.DIFF_SCALE * positionOffset);
         }
     }
 
     @Override
     public void onPageSelected(int position) {
+        // For fix scale bug
+        int scalingPages = CarouselConfig.getInstance().pageLimit;
+        if (scalingPages == 0) {
+            return;
+        } else {
+            scalingPages--;
+        }
+
+        if (scalingPages > 2) {
+            int oneSidePages = (scalingPages - 2) / 2;
+            for (int i = 0; i < oneSidePages; i++) {
+                PageLayout prevSidePage = getRootView(position - 1 - (i + 1));
+                if (prevSidePage != null) {
+                    prevSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                }
+                PageLayout nextSidePage = getRootView(position + 1 + (i + 1));
+                if (nextSidePage != null) {
+                    nextSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                }
+            }
+        }
     }
 
     @Override
@@ -101,7 +91,7 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
     }
 
     private PageLayout getRootView(int position) {
-        String tag = CarouselViewPager.getConfig().getPageFragmentTag(position);
+        String tag = CarouselConfig.getInstance().getPageFragmentTag(position);
         Fragment f = mFragmentManager.findFragmentByTag(tag);
         if (f != null && f.getView() != null) {
             return (PageLayout) f.getView().findViewById(R.id.root);
