@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 acbelter
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.acbelter.directionalcarousel;
 
 import android.content.Context;
@@ -117,11 +133,7 @@ public class CarouselViewPager extends ViewPager {
 
         setMeasuredDimension(mViewPagerWidth, mViewPagerHeight);
 
-        try {
-            calculatePageLimitAndMargin();
-        } catch (CarouselConfigException e) {
-            Log.e(TAG, e.toString());
-        }
+        calculatePageLimitAndMargin();
 
         setOffscreenPageLimit(mPageLimit);
         setPageMargin(mPageMargin);
@@ -132,7 +144,7 @@ public class CarouselViewPager extends ViewPager {
         }
     }
 
-    private void calculatePageLimitAndMargin() throws CarouselConfigException {
+    private void calculatePageLimitAndMargin() {
         if (mConfig.orientation != CarouselConfig.HORIZONTAL
                 && mConfig.orientation != CarouselConfig.VERTICAL) {
             throw new IllegalArgumentException("Invalid orientation value.");
@@ -156,7 +168,8 @@ public class CarouselViewPager extends ViewPager {
         }
 
         if (contentSize + 2*minOffset > viewSize) {
-            throw new CarouselConfigException("Page content is too large.");
+            Log.w(TAG, "Page content is too large.");
+            return;
         }
 
         final float step = 0.1f;
@@ -192,12 +205,6 @@ public class CarouselViewPager extends ViewPager {
             mPageMargin = -(viewSize - contentSize - offset);
         }
         mConfig.pageMargin = mPageMargin;
-    }
-
-    public static class CarouselConfigException extends Exception {
-        public CarouselConfigException(String msg) {
-            super(msg);
-        }
     }
 
     public static class CarouselState extends BaseSavedState {
