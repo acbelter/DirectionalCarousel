@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -41,6 +42,10 @@ public class CarouselViewPager extends ViewPager {
             if (a != null) {
                 mConfig.orientation = a.getInt(R.styleable.CarouselViewPager_android_orientation,
                         CarouselConfig.HORIZONTAL);
+                mConfig.infinite =
+                        a.getBoolean(R.styleable.CarouselViewPager_infinite, true);
+                mConfig.scrollScaling =
+                        a.getBoolean(R.styleable.CarouselViewPager_scrollScaling, true);
             }
         } finally {
             if (a != null) {
@@ -53,6 +58,14 @@ public class CarouselViewPager extends ViewPager {
     public Parcelable onSaveInstanceState() {
         CarouselState ss = new CarouselState(super.onSaveInstanceState());
         ss.position = getCurrentItem();
+
+        PagerAdapter adapter = getAdapter();
+        if (adapter == null) {
+            ss.itemsCount = 0;
+        } else {
+            ss.itemsCount = adapter.getCount();
+        }
+        ss.infinite = mConfig.infinite;
         return ss;
     }
 
@@ -66,7 +79,22 @@ public class CarouselViewPager extends ViewPager {
         CarouselState ss = (CarouselState) state;
         super.onRestoreInstanceState(ss.getSuperState());
 
-        setCurrentItem(ss.position);
+        if (getAdapter() == null) {
+            return;
+        }
+
+        if (ss.infinite && !mConfig.infinite) {
+            int offset = ss.position - ss.itemsCount / 2;
+            if (offset > 0) {
+                setCurrentItem(offset);
+            } else if (offset < 0) {
+                setCurrentItem(ss.itemsCount / CarouselConfig.LOOPS + offset);
+            }
+        } else if (!ss.infinite && mConfig.infinite) {
+            setCurrentItem(ss.itemsCount * CarouselConfig.LOOPS / 2 + ss.position);
+        } else {
+            setCurrentItem(ss.position);
+        }
     }
 
     @Override
@@ -119,8 +147,13 @@ public class CarouselViewPager extends ViewPager {
             viewSize = mViewPagerHeight;
         }
 
-        int minOffset = (int) (CarouselConfig.DIFF_SCALE * contentSize / 2) + mMinOffset;
-        contentSize *= CarouselConfig.SMALL_SCALE;
+        int minOffset;
+        if (mConfig.scrollScaling) {
+            minOffset = (int) (CarouselConfig.DIFF_SCALE * contentSize / 2) + mMinOffset;
+            contentSize *= CarouselConfig.SMALL_SCALE;
+        } else {
+            minOffset = mMinOffset;
+        }
 
         if (contentSize + 2*minOffset > viewSize) {
             throw new CarouselConfigException("Page content is too large.");
@@ -169,6 +202,8 @@ public class CarouselViewPager extends ViewPager {
 
     public static class CarouselState extends BaseSavedState {
         int position;
+        int itemsCount;
+        boolean infinite;
 
         public CarouselState(Parcelable superState) {
             super(superState);
@@ -177,6 +212,8 @@ public class CarouselViewPager extends ViewPager {
         private CarouselState(Parcel in) {
             super(in);
             position = in.readInt();
+            itemsCount = in.readInt();
+            infinite = in.readInt() == 1;
         }
 
         public static final Parcelable.Creator<CarouselState> CREATOR =
@@ -196,6 +233,8 @@ public class CarouselViewPager extends ViewPager {
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
             out.writeInt(position);
+            out.writeInt(itemsCount);
+            out.writeInt(infinite ? 1 : 0);
         }
     }
 }

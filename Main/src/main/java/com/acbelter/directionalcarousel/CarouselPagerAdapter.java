@@ -12,39 +12,51 @@ import java.util.ArrayList;
 
 public class CarouselPagerAdapter extends FragmentPagerAdapter implements
         ViewPager.OnPageChangeListener {
-    private int mPages;
-    private int mFirstPage;
+    private CarouselConfig mConfig;
+    private int mPagesCount;
+    private int mFirstPosition;
 
     private FragmentManager mFragmentManager;
     private ArrayList<PageItem> mItems;
 
-    public CarouselPagerAdapter(FragmentManager fragmentManager,
-                                ArrayList<PageItem> items) {
+    public CarouselPagerAdapter(FragmentManager fragmentManager, ArrayList<PageItem> items) {
         super(fragmentManager);
+        mConfig = CarouselConfig.getInstance();
         mFragmentManager = fragmentManager;
         if (items == null) {
             mItems = new ArrayList<PageItem>(0);
         } else {
             mItems = items;
         }
-        mPages = mItems.size();
-        mFirstPage = mPages * CarouselConfig.LOOPS / 2;
+        mPagesCount = mItems.size();
+        if (mConfig.infinite) {
+            mFirstPosition = mPagesCount * CarouselConfig.LOOPS / 2;
+        }
     }
 
     @Override
     public Fragment getItem(int position) {
-        position = position % mPages;
-        return PageFragment.newInstance(mItems.get(position), CarouselConfig.SMALL_SCALE);
+        if (mConfig.infinite) {
+            position = position % mPagesCount;
+        }
+        return PageFragment.newInstance(mItems.get(position));
     }
 
     @Override
     public int getCount() {
-        return mPages * CarouselConfig.LOOPS;
+        if (mConfig.infinite) {
+            return mPagesCount * CarouselConfig.LOOPS;
+        }
+        return mPagesCount;
     }
 
     @Override
-    public void onPageScrolled(final int position, final float positionOffset,
+    public void onPageScrolled(int position, float positionOffset,
                                int positionOffsetPixels) {
+        if (!mConfig.scrollScaling) {
+            return;
+        }
+
         PageLayout current = getRootView(position);
         PageLayout next = getRootView(position + 1);
 
@@ -74,11 +86,19 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
             for (int i = 0; i < oneSidePages; i++) {
                 PageLayout prevSidePage = getRootView(position - 1 - (i + 1));
                 if (prevSidePage != null) {
-                    prevSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                    if (mConfig.scrollScaling) {
+                        prevSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                    } else {
+                        prevSidePage.setScaleBoth(CarouselConfig.BIG_SCALE);
+                    }
                 }
                 PageLayout nextSidePage = getRootView(position + 1 + (i + 1));
                 if (nextSidePage != null) {
-                    nextSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                    if (mConfig.scrollScaling) {
+                        nextSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                    } else {
+                        nextSidePage.setScaleBoth(CarouselConfig.BIG_SCALE);
+                    }
                 }
             }
         }
@@ -88,8 +108,8 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
     public void onPageScrollStateChanged(int state) {
     }
 
-    public int getFirstPage() {
-        return mFirstPage;
+    public int getFirstPosition() {
+        return mFirstPosition;
     }
 
     private PageLayout getRootView(int position) {

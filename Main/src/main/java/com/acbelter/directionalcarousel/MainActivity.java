@@ -15,7 +15,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final int size = 100;
+        final int size = 10;
         ArrayList<PageItem> items = new ArrayList<PageItem>(size);
         for (int i = 0; i < size; i++) {
             items.add(new PageItem("Item " + i));
@@ -26,6 +26,6 @@ public class MainActivity extends FragmentActivity {
 
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.setOnPageChangeListener(mPagerAdapter);
-        mViewPager.setCurrentItem(mPagerAdapter.getFirstPage());
+        mViewPager.setCurrentItem(mPagerAdapter.getFirstPosition());
     }
 }

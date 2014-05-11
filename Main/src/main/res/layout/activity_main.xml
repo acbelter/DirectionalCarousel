@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                tools:context=".MainActivity">
+              xmlns:carousel="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              tools:context=".MainActivity">
 
     <View
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"/>
 
     <com.acbelter.directionalcarousel.CarouselViewPager
-        android:id="@+id/carousel_pager"
-        android:layout_width="250dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:overScrollMode="never"
-        android:background="@drawable/border"/>
+      android:id="@+id/carousel_pager"
+      android:layout_width="250dp"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:layout_gravity="center"
+      android:overScrollMode="never"
+      android:background="@drawable/border"
+      carousel:infinite="false"
+      carousel:scrollScaling="false"/>
 
     <View
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"/>
 </LinearLayout>

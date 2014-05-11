@@ -6,8 +6,8 @@ import android.view.View;
 
 public class CarouselConfig implements Parcelable {
     // You can choose a bigger number for LOOPS, but you know, nobody will fling
-    // more than 10000 times just in order to test your "infinite" ViewPager :D
-    public static final int LOOPS = 10000;
+    // more than 1000 times just in order to test your "infinite" ViewPager :D
+    public static final int LOOPS = 1000;
     public static final float BIG_SCALE = 1.0f;
     public static final float SMALL_SCALE = 0.7f;
     public static final float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
@@ -19,6 +19,9 @@ public class CarouselConfig implements Parcelable {
     public float scaleY = 1.0f;
 
     public int orientation = CarouselConfig.HORIZONTAL;
+    public boolean infinite = true;
+    public boolean scrollScaling = true;
+
     public int pageMargin = 0;
     public int pageLimit = 0;
     public int pagerId = View.NO_ID;
@@ -38,6 +41,8 @@ public class CarouselConfig implements Parcelable {
         scaleX = in.readFloat();
         scaleY = in.readFloat();
         orientation = in.readInt();
+        infinite = in.readInt() == 1;
+        scrollScaling = in.readInt() == 1;
         pageMargin = in.readInt();
         pageLimit = in.readInt();
         pagerId = in.readInt();
@@ -66,6 +71,8 @@ public class CarouselConfig implements Parcelable {
         out.writeFloat(scaleX);
         out.writeFloat(scaleY);
         out.writeInt(orientation);
+        out.writeInt(infinite ? 1 : 0);
+        out.writeInt(scrollScaling ? 1 : 0);
         out.writeInt(pageMargin);
         out.writeInt(pageLimit);
         out.writeInt(pagerId);
@@ -77,8 +84,15 @@ public class CarouselConfig implements Parcelable {
 
     @Override
     public String toString() {
-        return "scaleX=" + scaleX + " scaleY=" + scaleY +
-                " orientation=" + orientation + " pageMargin=" + pageMargin +
-                " pageLimit=" + pageLimit + " pagerId=" + pagerId;
+        return "CarouselConfig{" +
+                "scaleX=" + scaleX +
+                ", scaleY=" + scaleY +
+                ", orientation=" + orientation +
+                ", infinite=" + infinite +
+                ", scrollScaling=" + scrollScaling +
+                ", pageMargin=" + pageMargin +
+                ", pageLimit=" + pageLimit +
+                ", pagerId=" + pagerId +
+                '}';
     }
 }

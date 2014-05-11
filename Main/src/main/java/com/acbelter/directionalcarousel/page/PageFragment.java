@@ -12,11 +12,10 @@ import com.acbelter.directionalcarousel.R;
 
 public class PageFragment extends Fragment {
 
-    public static PageFragment newInstance(PageItem item, float scale) {
+    public static PageFragment newInstance(PageItem item) {
         PageFragment pf = new PageFragment();
         Bundle args = new Bundle();
         args.putParcelable("item", item);
-        args.putFloat("scale", scale);
         pf.setArguments(args);
         return pf;
     }
@@ -29,17 +28,22 @@ public class PageFragment extends Fragment {
         }
 
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.page, container, false);
-
         PageItem item = getArguments().getParcelable("item");
-        float scale = getArguments().getFloat("scale");
 
-        TextView title = (TextView) layout.findViewById(R.id.title);
-        title.setText(item.getTitle());
+        CarouselConfig config = CarouselConfig.getInstance();
+        float scale;
+        if (config.scrollScaling) {
+            scale = CarouselConfig.SMALL_SCALE;
+        } else {
+            scale = CarouselConfig.BIG_SCALE;
+        }
 
         PageLayout root = (PageLayout) layout.findViewById(R.id.root);
         root.setScaleBoth(scale);
 
-        CarouselConfig config = CarouselConfig.getInstance();
+        TextView title = (TextView) layout.findViewById(R.id.title);
+        title.setText(item.getTitle());
+
         if (config.orientation == CarouselConfig.VERTICAL) {
             layout.setScaleX(1.0f / config.scaleY);
             layout.setScaleY(1.0f / config.scaleX);
