@@ -22,6 +22,7 @@ import android.view.View;
 
 public class CarouselConfig implements Parcelable {
     public static final int LOOPS = 1000;
+    // FIXME Move scales to attrs
     public static final float BIG_SCALE = 1.0f;
     public static final float SMALL_SCALE = 0.7f;
     public static final float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;

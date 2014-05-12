@@ -40,7 +40,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
     private int mViewPagerWidth;
     private int mViewPagerHeight;
-
+    // FIXME Move to attrs
     private int mMinOffset = 20;
     private float mVisiblePart = 0.5f;
 
