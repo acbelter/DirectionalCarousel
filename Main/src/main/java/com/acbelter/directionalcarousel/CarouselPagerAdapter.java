@@ -19,26 +19,31 @@ package com.acbelter.directionalcarousel;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
+import com.acbelter.directionalcarousel.page.OnPageClickListener;
 import com.acbelter.directionalcarousel.page.PageFragment;
 import com.acbelter.directionalcarousel.page.PageItem;
 import com.acbelter.directionalcarousel.page.PageLayout;
 
 import java.util.ArrayList;
 
-public class CarouselPagerAdapter extends FragmentPagerAdapter implements
-        ViewPager.OnPageChangeListener {
+public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPageChangeListener {
     private CarouselConfig mConfig;
     private int mPagesCount;
     private int mFirstPosition;
 
     private FragmentManager mFragmentManager;
+    private OnPageClickListener mCallback;
     private ArrayList<PageItem> mItems;
 
-    public CarouselPagerAdapter(FragmentManager fragmentManager, ArrayList<PageItem> items) {
+    public CarouselPagerAdapter(FragmentManager fragmentManager,
+                                OnPageClickListener callback,
+                                ArrayList<PageItem> items) {
         super(fragmentManager);
         mConfig = CarouselConfig.getInstance();
         mFragmentManager = fragmentManager;
+        mCallback = callback;
         if (items == null) {
             mItems = new ArrayList<PageItem>(0);
         } else {
@@ -50,11 +55,24 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
         }
     }
 
+    public void sendSingleTap(View view, PageItem item) {
+        if (mCallback != null) {
+            mCallback.onSingleTap(view, item);
+        }
+    }
+
+    public void sendDoubleTap(View view, PageItem item) {
+        if (mCallback != null) {
+            mCallback.onDoubleTap(view, item);
+        }
+    }
+
     @Override
     public Fragment getItem(int position) {
         if (mConfig.infinite) {
             position = position % mPagesCount;
         }
+
         return PageFragment.newInstance(mItems.get(position));
     }
 
@@ -73,8 +91,8 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
             return;
         }
 
-        PageLayout current = getRootView(position);
-        PageLayout next = getRootView(position + 1);
+        PageLayout current = getPageView(position);
+        PageLayout next = getPageView(position + 1);
 
         if (current != null) {
             current.setScaleBoth(CarouselConfig.BIG_SCALE
@@ -100,7 +118,7 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
         if (scalingPages > 2) {
             int oneSidePages = (scalingPages - 2) / 2;
             for (int i = 0; i < oneSidePages; i++) {
-                PageLayout prevSidePage = getRootView(position - 1 - (i + 1));
+                PageLayout prevSidePage = getPageView(position - 1 - (i + 1));
                 if (prevSidePage != null) {
                     if (mConfig.scrollScaling) {
                         prevSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
@@ -108,7 +126,7 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
                         prevSidePage.setScaleBoth(CarouselConfig.BIG_SCALE);
                     }
                 }
-                PageLayout nextSidePage = getRootView(position + 1 + (i + 1));
+                PageLayout nextSidePage = getPageView(position + 1 + (i + 1));
                 if (nextSidePage != null) {
                     if (mConfig.scrollScaling) {
                         nextSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
@@ -128,11 +146,11 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements
         return mFirstPosition;
     }
 
-    private PageLayout getRootView(int position) {
+    private PageLayout getPageView(int position) {
         String tag = CarouselConfig.getInstance().getPageFragmentTag(position);
         Fragment f = mFragmentManager.findFragmentByTag(tag);
         if (f != null && f.getView() != null) {
-            return (PageLayout) f.getView().findViewById(R.id.root);
+            return (PageLayout) f.getView().findViewById(R.id.page);
         }
         return null;
     }

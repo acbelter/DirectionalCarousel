@@ -21,9 +21,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.acbelter.directionalcarousel.CarouselConfig;
+import com.acbelter.directionalcarousel.CarouselViewPager;
 import com.acbelter.directionalcarousel.R;
 
 public class PageFragment extends Fragment {
@@ -43,7 +43,16 @@ public class PageFragment extends Fragment {
             return null;
         }
 
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.page, container, false);
+        if (container.getClass() != CarouselViewPager.class) {
+            throw new IllegalArgumentException("PageFragment must be attached to " +
+                    "CarouselViewPager.");
+        }
+
+        PageLayout pageLayout = (PageLayout) inflater.inflate(R.layout.page, container, false);
+        if (pageLayout == null) {
+            throw new IllegalStateException("PageFragment root layout must have id " +
+                    "R.id.page.");
+        }
         PageItem item = getArguments().getParcelable("item");
 
         CarouselConfig config = CarouselConfig.getInstance();
@@ -53,19 +62,25 @@ public class PageFragment extends Fragment {
         } else {
             scale = CarouselConfig.BIG_SCALE;
         }
+        pageLayout.setScaleBoth(scale);
 
-        PageLayout root = (PageLayout) layout.findViewById(R.id.root);
-        root.setScaleBoth(scale);
-
-        TextView title = (TextView) layout.findViewById(R.id.title);
+        TextView title = (TextView) pageLayout.findViewById(R.id.title);
         title.setText(item.getTitle());
 
         if (config.orientation == CarouselConfig.VERTICAL) {
-            layout.setScaleX(1.0f / config.scaleY);
-            layout.setScaleY(1.0f / config.scaleX);
-            layout.setRotation(-90);
+            pageLayout.setScaleX(1.0f / config.scaleY);
+            pageLayout.setScaleY(1.0f / config.scaleX);
+            pageLayout.setRotation(-90);
         }
 
-        return layout;
+        View pageContent = pageLayout.findViewById(R.id.page_content);
+        if (pageContent == null) {
+            throw new IllegalStateException("PageFragment layout must contains " +
+                    "layout with id R.id.page_content.");
+        }
+
+        pageContent.setOnTouchListener((CarouselViewPager) container);
+        pageContent.setTag(item);
+        return pageLayout;
     }
 }

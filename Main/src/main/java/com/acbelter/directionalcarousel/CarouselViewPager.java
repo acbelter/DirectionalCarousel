@@ -26,9 +26,15 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import com.acbelter.directionalcarousel.page.PageItem;
 
-public class CarouselViewPager extends ViewPager {
+public class CarouselViewPager extends ViewPager implements OnTouchListener {
     private static final boolean DEBUG = false;
     private static final String TAG = "CarouselViewPager";
 
@@ -43,6 +49,11 @@ public class CarouselViewPager extends ViewPager {
 
     private Resources mResources;
     private CarouselConfig mConfig;
+
+    private GestureDetector mGestureDetector;
+    private OnGestureListener mGestureListener;
+    private View mTouchedView;
+    private PageItem mTouchedItem;
 
     public CarouselViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -68,6 +79,41 @@ public class CarouselViewPager extends ViewPager {
                 a.recycle();
             }
         }
+
+        mGestureListener = new SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (getCarouselAdapter() != null) {
+                    getCarouselAdapter().sendSingleTap(mTouchedView, mTouchedItem);
+                }
+                dispatchTouchEvent(e);
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (getCarouselAdapter() != null) {
+                    getCarouselAdapter().sendDoubleTap(mTouchedView, mTouchedItem);
+                }
+                dispatchTouchEvent(e);
+                return true;
+            }
+        };
+
+        mGestureDetector = new GestureDetector(context, mGestureListener);
+    }
+
+    private CarouselPagerAdapter getCarouselAdapter() {
+        PagerAdapter adapter = getAdapter();
+        if (adapter == null) {
+            return null;
+        }
+
+        if (adapter.getClass() != CarouselPagerAdapter.class) {
+            throw new ClassCastException("Adapter must be instance of CarouselPagerAdapter class.");
+        }
+
+        return (CarouselPagerAdapter) adapter;
     }
 
     @Override
@@ -114,8 +160,10 @@ public class CarouselViewPager extends ViewPager {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return true;
+    public boolean onTouch(View view, MotionEvent e) {
+        mTouchedView = view;
+        mTouchedItem = (PageItem) view.getTag();
+        return mGestureDetector.onTouchEvent(e);
     }
 
     @Override
