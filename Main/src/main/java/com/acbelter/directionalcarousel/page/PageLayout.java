@@ -23,7 +23,7 @@ import android.widget.LinearLayout;
 import com.acbelter.directionalcarousel.CarouselConfig;
 
 public class PageLayout extends LinearLayout {
-    private float mScale = CarouselConfig.BIG_SCALE;
+    private float mScale = CarouselConfig.getInstance().bigScale;
 
     public PageLayout(Context context, AttributeSet attrs) {
         super(context, attrs);

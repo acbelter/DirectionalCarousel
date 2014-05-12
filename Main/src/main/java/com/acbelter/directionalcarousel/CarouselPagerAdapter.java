@@ -95,19 +95,19 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
         PageLayout next = getPageView(position + 1);
 
         if (current != null) {
-            current.setScaleBoth(CarouselConfig.BIG_SCALE
-                    - CarouselConfig.DIFF_SCALE * positionOffset);
+            current.setScaleBoth(mConfig.bigScale
+                    - mConfig.getDiffScale() * positionOffset);
         }
 
         if (next != null) {
-            next.setScaleBoth(CarouselConfig.SMALL_SCALE
-                    + CarouselConfig.DIFF_SCALE * positionOffset);
+            next.setScaleBoth(mConfig.smallScale
+                    + mConfig.getDiffScale() * positionOffset);
         }
     }
 
     @Override
     public void onPageSelected(int position) {
-        // Fix fast scroll scaling bug
+        // FIXME Temporary fix fast scroll scaling bug (not always work)
         int scalingPages = CarouselConfig.getInstance().pageLimit;
         if (scalingPages == 0) {
             return;
@@ -121,17 +121,17 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
                 PageLayout prevSidePage = getPageView(position - 1 - (i + 1));
                 if (prevSidePage != null) {
                     if (mConfig.scrollScaling) {
-                        prevSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                        prevSidePage.setScaleBoth(mConfig.smallScale);
                     } else {
-                        prevSidePage.setScaleBoth(CarouselConfig.BIG_SCALE);
+                        prevSidePage.setScaleBoth(mConfig.bigScale);
                     }
                 }
                 PageLayout nextSidePage = getPageView(position + 1 + (i + 1));
                 if (nextSidePage != null) {
                     if (mConfig.scrollScaling) {
-                        nextSidePage.setScaleBoth(CarouselConfig.SMALL_SCALE);
+                        nextSidePage.setScaleBoth(mConfig.smallScale);
                     } else {
-                        nextSidePage.setScaleBoth(CarouselConfig.BIG_SCALE);
+                        nextSidePage.setScaleBoth(mConfig.bigScale);
                     }
                 }
             }

@@ -19,5 +19,9 @@
         <attr name="android:orientation"/>
         <attr name="infinite" format="boolean"/>
         <attr name="scrollScaling" format="boolean"/>
+        <attr name="bigScale" format="float"/>
+        <attr name="smallScale" format="float"/>
+        <attr name="minPagesOffset" format="dimension"/>
+        <attr name="sidePagesVisiblePart" format="float"/>
     </declare-styleable>
 </resources>

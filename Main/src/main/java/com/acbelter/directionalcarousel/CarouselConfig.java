@@ -22,10 +22,11 @@ import android.view.View;
 
 public class CarouselConfig implements Parcelable {
     public static final int LOOPS = 1000;
-    // FIXME Move scales to attrs
-    public static final float BIG_SCALE = 1.0f;
-    public static final float SMALL_SCALE = 0.7f;
-    public static final float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
+    public static final float DEFAULT_BIG_SCALE = 1.0f;
+    public static final float DEFAULT_SMALL_SCALE = 0.7f;
+
+    public float bigScale = DEFAULT_BIG_SCALE;
+    public float smallScale = DEFAULT_SMALL_SCALE;
 
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
@@ -93,6 +94,10 @@ public class CarouselConfig implements Parcelable {
         out.writeInt(pagerId);
     }
 
+    public float getDiffScale() {
+        return bigScale - smallScale;
+    }
+
     public String getPageFragmentTag(int position) {
         return "android:switcher:" + pagerId + ":" + position;
     }
@@ -100,7 +105,9 @@ public class CarouselConfig implements Parcelable {
     @Override
     public String toString() {
         return "CarouselConfig{" +
-                "scaleX=" + scaleX +
+                "bigScale=" + bigScale +
+                ", smallScale=" + smallScale +
+                ", scaleX=" + scaleX +
                 ", scaleY=" + scaleY +
                 ", orientation=" + orientation +
                 ", infinite=" + infinite +

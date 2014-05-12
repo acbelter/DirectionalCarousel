@@ -26,6 +26,7 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -35,14 +36,15 @@ import android.view.View.OnTouchListener;
 import com.acbelter.directionalcarousel.page.PageItem;
 
 public class CarouselViewPager extends ViewPager implements OnTouchListener {
-    private static final boolean DEBUG = false;
+    public static final float DEFAULT_SIDE_PAGES_VISIBLE_PART = 0.5f;
     private static final String TAG = "CarouselViewPager";
+    private static final boolean DEBUG = false;
 
     private int mViewPagerWidth;
     private int mViewPagerHeight;
-    // FIXME Move to attrs
-    private int mMinOffset = 20;
-    private float mVisiblePart = 0.5f;
+
+    private int mMinPagesOffset;
+    private float mSidePagesVisiblePart;
 
     private int mPageLimit;
     private int mPageMargin;
@@ -61,9 +63,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         mConfig.pagerId = getId();
         mResources = context.getResources();
 
-        DisplayMetrics metrics = mResources.getDisplayMetrics();
-        mMinOffset *= metrics.density;
-
+        DisplayMetrics dm = mResources.getDisplayMetrics();
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarouselViewPager);
         try {
             if (a != null) {
@@ -73,6 +73,34 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                         a.getBoolean(R.styleable.CarouselViewPager_infinite, true);
                 mConfig.scrollScaling =
                         a.getBoolean(R.styleable.CarouselViewPager_scrollScaling, true);
+
+                float bigScale = a.getFloat(R.styleable.CarouselViewPager_bigScale,
+                        CarouselConfig.DEFAULT_BIG_SCALE);
+                if (bigScale > 1.0f || bigScale < 0.0f) {
+                    bigScale = CarouselConfig.DEFAULT_BIG_SCALE;
+                    Log.w(TAG, "Invalid bigScale attribute. Default value " +
+                            CarouselConfig.DEFAULT_BIG_SCALE + " will be used.");
+                }
+                mConfig.bigScale = bigScale;
+
+                float smallScale = a.getFloat(R.styleable.CarouselViewPager_smallScale,
+                        CarouselConfig.DEFAULT_SMALL_SCALE);
+                if (smallScale > 1.0f || smallScale < 0.0f) {
+                    smallScale = CarouselConfig.DEFAULT_SMALL_SCALE;
+                    Log.w(TAG, "Invalid smallScale attribute. Default value " +
+                            CarouselConfig.DEFAULT_SMALL_SCALE + " will be used.");
+                } else if (smallScale > bigScale) {
+                    smallScale = bigScale;
+                    Log.w(TAG, "Invalid smallScale attribute. Value " + bigScale +
+                            " will be used.");
+                }
+                mConfig.smallScale = smallScale;
+
+                mMinPagesOffset = (int) a.getDimension(R.styleable.CarouselViewPager_minPagesOffset,
+                        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, dm));
+                mSidePagesVisiblePart =
+                        a.getFloat(R.styleable.CarouselViewPager_sidePagesVisiblePart,
+                                DEFAULT_SIDE_PAGES_VISIBLE_PART);
             }
         } finally {
             if (a != null) {
@@ -193,11 +221,6 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     }
 
     private void calculatePageLimitAndMargin() {
-        if (mConfig.orientation != CarouselConfig.HORIZONTAL
-                && mConfig.orientation != CarouselConfig.VERTICAL) {
-            throw new IllegalArgumentException("Invalid orientation value.");
-        }
-
         int contentSize, viewSize;
         if (mConfig.orientation == CarouselConfig.HORIZONTAL) {
             contentSize = mResources.getDimensionPixelSize(R.dimen.page_content_width);
@@ -209,10 +232,10 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
         int minOffset;
         if (mConfig.scrollScaling) {
-            minOffset = (int) (CarouselConfig.DIFF_SCALE * contentSize / 2) + mMinOffset;
-            contentSize *= CarouselConfig.SMALL_SCALE;
+            minOffset = (int) (mConfig.getDiffScale() * contentSize / 2) + mMinPagesOffset;
+            contentSize *= mConfig.smallScale;
         } else {
-            minOffset = mMinOffset;
+            minOffset = mMinPagesOffset;
         }
 
         if (contentSize + 2*minOffset > viewSize) {
@@ -221,13 +244,13 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         final float step = 0.1f;
-        while (contentSize + 2*contentSize*(mVisiblePart-step) + 2*minOffset > viewSize
-                && Math.abs(mVisiblePart-step) > 1e-6) {
-            mVisiblePart -= step;
+        while (contentSize + 2*contentSize*(mSidePagesVisiblePart -step) + 2*minOffset > viewSize
+                && Math.abs(mSidePagesVisiblePart -step) > 1e-6) {
+            mSidePagesVisiblePart -= step;
         }
 
         int fullPages = 0;
-        final int s = viewSize - (int) (2*contentSize*mVisiblePart);
+        final int s = viewSize - (int) (2*contentSize* mSidePagesVisiblePart);
         while (minOffset + (fullPages+1)*(contentSize + minOffset) <= s) {
             fullPages++;
         }
@@ -238,7 +261,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
         int offset = (s - fullPages * contentSize) / (fullPages + 1);
 
-        if (Math.abs(mVisiblePart) > 1e-6) {
+        if (Math.abs(mSidePagesVisiblePart) > 1e-6) {
             mPageLimit = (fullPages + 2) - 1;
         } else {
             mPageLimit = fullPages - 1;
