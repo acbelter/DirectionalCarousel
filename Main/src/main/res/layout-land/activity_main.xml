@@ -14,5 +14,5 @@
       android:layout_height="match_parent"
       android:orientation="horizontal"
       carousel:infinite="false"
-      carousel:scrollScalingMode="bigCurrent"/>
+      carousel:scrollScalingMode="bigAll"/>
 </LinearLayout>

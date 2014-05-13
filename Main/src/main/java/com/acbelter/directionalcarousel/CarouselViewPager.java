@@ -43,7 +43,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     private int mViewPagerWidth;
     private int mViewPagerHeight;
 
-    // Distance between pages ALWAYS will be greater than this value
+    // Distance between pages always will be greater than this value (even when scaling)
     private int mMinPagesOffset;
     private float mSidePagesVisiblePart;
 
@@ -180,10 +180,15 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         if (ss.infinite && !mConfig.infinite) {
-            int offset = ss.position - ss.itemsCount / 2;
-            if (offset > 0) {
+            int itemsCount = getAdapter().getCount();
+            if (itemsCount == 0) {
+                return;
+            }
+
+            int offset = (ss.position - ss.itemsCount / 2) % itemsCount;
+            if (offset >= 0) {
                 setCurrentItem(offset);
-            } else if (offset < 0) {
+            } else {
                 setCurrentItem(ss.itemsCount / CarouselConfig.LOOPS + offset);
             }
         } else if (!ss.infinite && mConfig.infinite) {
@@ -214,9 +219,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         setMeasuredDimension(mViewPagerWidth, mViewPagerHeight);
-
         calculatePageLimitAndMargin();
-
         setOffscreenPageLimit(mPageLimit);
         setPageMargin(mPageMargin);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -276,14 +279,13 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         int offset = (s - fullPages * contentSize) / (fullPages + 1);
-
         if (Math.abs(mSidePagesVisiblePart) > 1e-6) {
             mPageLimit = (fullPages + 2) - 1;
         } else {
             mPageLimit = fullPages - 1;
         }
         // Reserve pages for correct scrolling
-        mPageLimit *= 3;
+        mPageLimit = 2*mPageLimit + mPageLimit / 2;
         mConfig.pageLimit = mPageLimit;
 
         if (mConfig.orientation == CarouselConfig.VERTICAL) {

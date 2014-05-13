@@ -18,15 +18,14 @@ public class MainActivity extends FragmentActivity implements OnPageClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final int size = 100;
+        final int size = 20;
         ArrayList<PageItem> items = new ArrayList<PageItem>(size);
         for (int i = 0; i < size; i++) {
             items.add(new PageItem("Item " + i));
         }
 
         mViewPager = (CarouselViewPager) findViewById(R.id.carousel_pager);
-        mPagerAdapter = new CarouselPagerAdapter(getSupportFragmentManager(),
-                mViewPager, this, items);
+        mPagerAdapter = new CarouselPagerAdapter(getSupportFragmentManager(), this, items);
 
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.setOnPageChangeListener(mPagerAdapter);

@@ -34,19 +34,16 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
     private int mFirstPosition;
 
     private FragmentManager mFragmentManager;
-    private CarouselViewPager mViewPager;
     private OnPageClickListener mCallback;
     private ArrayList<PageItem> mItems;
-    private boolean mDragging;
+    private int mCurrentPosition;
 
     public CarouselPagerAdapter(FragmentManager fragmentManager,
-                                CarouselViewPager viewPager,
                                 OnPageClickListener callback,
                                 ArrayList<PageItem> items) {
         super(fragmentManager);
         mConfig = CarouselConfig.getInstance();
         mFragmentManager = fragmentManager;
-        mViewPager = viewPager;
         mCallback = callback;
         if (items == null) {
             mItems = new ArrayList<PageItem>(0);
@@ -112,6 +109,10 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
                 if (current != null) {
                     current.setScaleBoth(mConfig.bigScale);
                 }
+
+                if (positionOffset > 0.0f) {
+                    scaleAdjacentPages(position, mConfig.pageLimit, mConfig.bigScale);
+                }
                 break;
             }
             case CarouselConfig.SCROLL_MODE_NONE: {
@@ -122,13 +123,14 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
 
     @Override
     public void onPageSelected(int position) {
+        mCurrentPosition = position;
         int scalingPages = CarouselConfig.getInstance().pageLimit;
         if (scalingPages == 0) {
             return;
         }
 
         if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_CURRENT) {
-            // FIXME Temporary fix fast scroll scaling bug (not always work)
+            // Fix fast scroll scaling bug
             scaleAdjacentPages(position, scalingPages, mConfig.smallScale);
         } else if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_NONE) {
             scaleAdjacentPages(position, scalingPages, mConfig.bigScale);
@@ -160,34 +162,14 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
 
     @Override
     public void onPageScrollStateChanged(int state) {
-        switch (state) {
-            case CarouselViewPager.SCROLL_STATE_IDLE: {
-                if (mDragging) {
-                    int scalingPages = CarouselConfig.getInstance().pageLimit;
-                    if (scalingPages == 0) {
-                        return;
-                    }
-
-                    if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
-                        scaleAdjacentPages(mViewPager.getCurrentItem(),
-                                scalingPages, mConfig.smallScale);
-                    }
-
-                    mDragging = false;
-                }
-                break;
+        if (state == CarouselViewPager.SCROLL_STATE_IDLE) {
+            int scalingPages = CarouselConfig.getInstance().pageLimit;
+            if (scalingPages == 0) {
+                return;
             }
-            case CarouselViewPager.SCROLL_STATE_SETTLING: {
-                break;
-            }
-            case CarouselViewPager.SCROLL_STATE_DRAGGING: {
-                mDragging = true;
-                if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
-                    int position = mViewPager.getCurrentItem();
-                    int scalingPages = CarouselConfig.getInstance().pageLimit;
-                    scaleAdjacentPages(position, scalingPages, mConfig.bigScale);
-                }
-                break;
+
+            if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
+                scaleAdjacentPages(mCurrentPosition, scalingPages, mConfig.smallScale);
             }
         }
     }
