@@ -34,15 +34,19 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
     private int mFirstPosition;
 
     private FragmentManager mFragmentManager;
+    private CarouselViewPager mViewPager;
     private OnPageClickListener mCallback;
     private ArrayList<PageItem> mItems;
+    private boolean mDragging;
 
     public CarouselPagerAdapter(FragmentManager fragmentManager,
+                                CarouselViewPager viewPager,
                                 OnPageClickListener callback,
                                 ArrayList<PageItem> items) {
         super(fragmentManager);
         mConfig = CarouselConfig.getInstance();
         mFragmentManager = fragmentManager;
+        mViewPager = viewPager;
         mCallback = callback;
         if (items == null) {
             mItems = new ArrayList<PageItem>(0);
@@ -87,59 +91,105 @@ public class CarouselPagerAdapter extends FragmentPagerAdapter implements OnPage
     @Override
     public void onPageScrolled(int position, float positionOffset,
                                int positionOffsetPixels) {
-        if (!mConfig.scrollScaling) {
-            return;
-        }
+        switch (mConfig.scrollScalingMode) {
+            case CarouselConfig.SCROLL_MODE_BIG_CURRENT: {
+                PageLayout current = getPageView(position);
+                PageLayout next = getPageView(position + 1);
 
-        PageLayout current = getPageView(position);
-        PageLayout next = getPageView(position + 1);
+                if (current != null) {
+                    current.setScaleBoth(mConfig.bigScale
+                            - mConfig.getDiffScale() * positionOffset);
+                }
 
-        if (current != null) {
-            current.setScaleBoth(mConfig.bigScale
-                    - mConfig.getDiffScale() * positionOffset);
-        }
-
-        if (next != null) {
-            next.setScaleBoth(mConfig.smallScale
-                    + mConfig.getDiffScale() * positionOffset);
+                if (next != null) {
+                    next.setScaleBoth(mConfig.smallScale
+                            + mConfig.getDiffScale() * positionOffset);
+                }
+                break;
+            }
+            case CarouselConfig.SCROLL_MODE_BIG_ALL: {
+                PageLayout current = getPageView(position);
+                if (current != null) {
+                    current.setScaleBoth(mConfig.bigScale);
+                }
+                break;
+            }
+            case CarouselConfig.SCROLL_MODE_NONE: {
+                break;
+            }
         }
     }
 
     @Override
     public void onPageSelected(int position) {
-        // FIXME Temporary fix fast scroll scaling bug (not always work)
         int scalingPages = CarouselConfig.getInstance().pageLimit;
         if (scalingPages == 0) {
             return;
-        } else {
-            scalingPages--;
         }
 
-        if (scalingPages > 2) {
-            int oneSidePages = (scalingPages - 2) / 2;
-            for (int i = 0; i < oneSidePages; i++) {
-                PageLayout prevSidePage = getPageView(position - 1 - (i + 1));
-                if (prevSidePage != null) {
-                    if (mConfig.scrollScaling) {
-                        prevSidePage.setScaleBoth(mConfig.smallScale);
-                    } else {
-                        prevSidePage.setScaleBoth(mConfig.bigScale);
-                    }
-                }
-                PageLayout nextSidePage = getPageView(position + 1 + (i + 1));
-                if (nextSidePage != null) {
-                    if (mConfig.scrollScaling) {
-                        nextSidePage.setScaleBoth(mConfig.smallScale);
-                    } else {
-                        nextSidePage.setScaleBoth(mConfig.bigScale);
-                    }
-                }
+        if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_CURRENT) {
+            // FIXME Temporary fix fast scroll scaling bug (not always work)
+            scaleAdjacentPages(position, scalingPages, mConfig.smallScale);
+        } else if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_NONE) {
+            scaleAdjacentPages(position, scalingPages, mConfig.bigScale);
+        }
+    }
+
+    /**
+     * @param position Position of the current page.
+     * @param scalingPages The number of pages on both sides of the current page,
+     *                     which must be scaled.
+     * @param scale Scale value.
+     */
+    private void scaleAdjacentPages(int position, int scalingPages, float scale) {
+        if (scalingPages == 0) {
+            return;
+        }
+
+        for (int i = 0; i < scalingPages / 2; i++) {
+            PageLayout prevSidePage = getPageView(position - (i + 1));
+            if (prevSidePage != null) {
+                prevSidePage.setScaleBoth(scale);
+            }
+            PageLayout nextSidePage = getPageView(position + (i + 1));
+            if (nextSidePage != null) {
+                nextSidePage.setScaleBoth(scale);
             }
         }
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
+        switch (state) {
+            case CarouselViewPager.SCROLL_STATE_IDLE: {
+                if (mDragging) {
+                    int scalingPages = CarouselConfig.getInstance().pageLimit;
+                    if (scalingPages == 0) {
+                        return;
+                    }
+
+                    if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
+                        scaleAdjacentPages(mViewPager.getCurrentItem(),
+                                scalingPages, mConfig.smallScale);
+                    }
+
+                    mDragging = false;
+                }
+                break;
+            }
+            case CarouselViewPager.SCROLL_STATE_SETTLING: {
+                break;
+            }
+            case CarouselViewPager.SCROLL_STATE_DRAGGING: {
+                mDragging = true;
+                if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
+                    int position = mViewPager.getCurrentItem();
+                    int scalingPages = CarouselConfig.getInstance().pageLimit;
+                    scaleAdjacentPages(position, scalingPages, mConfig.bigScale);
+                }
+                break;
+            }
+        }
     }
 
     public int getFirstPosition() {

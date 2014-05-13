@@ -31,12 +31,16 @@ public class CarouselConfig implements Parcelable {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
+    public static final int SCROLL_MODE_BIG_CURRENT = 0;
+    public static final int SCROLL_MODE_BIG_ALL = 1;
+    public static final int SCROLL_MODE_NONE = 2;
+
     public float scaleX = 1.0f;
     public float scaleY = 1.0f;
 
-    public int orientation = CarouselConfig.HORIZONTAL;
+    public int orientation = HORIZONTAL;
     public boolean infinite = true;
-    public boolean scrollScaling = true;
+    public int scrollScalingMode = SCROLL_MODE_BIG_CURRENT;
 
     public int pageMargin = 0;
     public int pageLimit = 0;
@@ -58,7 +62,7 @@ public class CarouselConfig implements Parcelable {
         scaleY = in.readFloat();
         orientation = in.readInt();
         infinite = in.readInt() == 1;
-        scrollScaling = in.readInt() == 1;
+        scrollScalingMode = in.readInt();
         pageMargin = in.readInt();
         pageLimit = in.readInt();
         pagerId = in.readInt();
@@ -88,7 +92,7 @@ public class CarouselConfig implements Parcelable {
         out.writeFloat(scaleY);
         out.writeInt(orientation);
         out.writeInt(infinite ? 1 : 0);
-        out.writeInt(scrollScaling ? 1 : 0);
+        out.writeInt(scrollScalingMode);
         out.writeInt(pageMargin);
         out.writeInt(pageLimit);
         out.writeInt(pagerId);
@@ -111,7 +115,7 @@ public class CarouselConfig implements Parcelable {
                 ", scaleY=" + scaleY +
                 ", orientation=" + orientation +
                 ", infinite=" + infinite +
-                ", scrollScaling=" + scrollScaling +
+                ", scrollScalingMode=" + scrollScalingMode +
                 ", pageMargin=" + pageMargin +
                 ", pageLimit=" + pageLimit +
                 ", pagerId=" + pagerId +

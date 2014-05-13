@@ -18,10 +18,16 @@
     <declare-styleable name="CarouselViewPager">
         <attr name="android:orientation"/>
         <attr name="infinite" format="boolean"/>
-        <attr name="scrollScaling" format="boolean"/>
+        <attr name="scrollScalingMode"/>
         <attr name="bigScale" format="float"/>
         <attr name="smallScale" format="float"/>
         <attr name="minPagesOffset" format="dimension"/>
         <attr name="sidePagesVisiblePart" format="float"/>
     </declare-styleable>
+
+    <attr name="scrollScalingMode" format="enum">
+        <enum name="bigCurrent" value="0"/>
+        <enum name="bigAll" value="1"/>
+        <enum name="none" value="2"/>
+    </attr>
 </resources>

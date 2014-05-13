@@ -57,7 +57,8 @@ public class PageFragment extends Fragment {
 
         CarouselConfig config = CarouselConfig.getInstance();
         float scale;
-        if (config.scrollScaling) {
+        if (config.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_CURRENT ||
+                config.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
             scale = config.smallScale;
         } else {
             scale = config.bigScale;
