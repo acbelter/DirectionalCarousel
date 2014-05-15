@@ -27,11 +27,11 @@ import com.acbelter.directionalcarousel.CarouselViewPager;
 
 public abstract class PageFragment<T extends Parcelable> extends Fragment {
     /**
-     * @param container Parent ViewPager.
      * @param pageLayout Layout of page.
      * @param pageItem Item for customize page content view.
+     * @return View of page content.
      */
-    public abstract void setupPage(CarouselViewPager container, PageLayout pageLayout, T pageItem);
+    public abstract View setupPage(PageLayout pageLayout, T pageItem);
 
     public static Bundle createArgs(int pageLayoutId, Parcelable item) {
         Bundle args = new Bundle();
@@ -76,7 +76,11 @@ public abstract class PageFragment<T extends Parcelable> extends Fragment {
         }
 
         T item = getArguments().getParcelable("item");
-        setupPage((CarouselViewPager) container, pageLayout, item);
+        View pageContent = setupPage(pageLayout, item);
+        if (pageContent != null) {
+            pageContent.setOnTouchListener((CarouselViewPager) container);
+            pageContent.setTag(item);
+        }
         return pageLayout;
     }
 }
