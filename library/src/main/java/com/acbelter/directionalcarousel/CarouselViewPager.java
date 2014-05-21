@@ -112,7 +112,6 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 if (getCarouselAdapter() != null) {
                     getCarouselAdapter().sendSingleTap(mTouchedView, mTouchedItem);
                 }
-                dispatchTouchEvent(e);
                 mTouchedView = null;
                 mTouchedItem = null;
                 return true;
@@ -123,7 +122,6 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 if (getCarouselAdapter() != null) {
                     getCarouselAdapter().sendDoubleTap(mTouchedView, mTouchedItem);
                 }
-                dispatchTouchEvent(e);
                 mTouchedView = null;
                 mTouchedItem = null;
                 return true;
@@ -222,7 +220,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
         if (mConfig.orientation == CarouselConfig.VERTICAL) {
             setRotation(90);
-            // It's magic!
+            // Some magic...
             float offset = (mViewPagerWidth - mViewPagerHeight) * 0.5f;
             setTranslationX(offset);
             setTranslationY(-offset);
@@ -261,6 +259,10 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         return res.getDimensionPixelSize(pageContentHeightId);
     }
 
+    /**
+     * @param context Context.
+     * @return True, if config was successfully updated.
+     */
     private boolean calculatePageLimitAndMargin(Context context) {
         if (mViewPagerWidth == 0 || mViewPagerHeight == 0) {
             return false;
