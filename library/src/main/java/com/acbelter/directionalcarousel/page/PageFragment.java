@@ -70,8 +70,6 @@ public abstract class PageFragment<T extends Parcelable> extends Fragment {
         pageLayout.setScaleBoth(scale);
 
         if (config.orientation == CarouselConfig.VERTICAL) {
-            pageLayout.setScaleX(1.0f / config.scaleY);
-            pageLayout.setScaleY(1.0f / config.scaleX);
             pageLayout.setRotation(-90);
         }
 

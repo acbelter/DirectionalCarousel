@@ -46,9 +46,6 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     private int mMinPagesOffset;
     private float mSidePagesVisiblePart;
 
-    private int mPageLimit;
-    private int mPageMargin;
-
     private Resources mResources;
     private CarouselConfig mConfig;
 
@@ -219,37 +216,62 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         mViewPagerWidth = MeasureSpec.getSize(widthMeasureSpec);
         mViewPagerHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (mConfig.orientation == CarouselConfig.VERTICAL) {
-            setRotation(90);
-            mConfig.scaleX = (float) mViewPagerHeight / mViewPagerWidth;
-            mConfig.scaleY = (float) mViewPagerWidth / mViewPagerHeight;
-            setScaleX(mConfig.scaleX);
-            setScaleY(mConfig.scaleY);
+        if (DEBUG) {
+            Log.d(TAG, "w=" + mViewPagerWidth + " h=" + mViewPagerHeight);
         }
 
-        setMeasuredDimension(mViewPagerWidth, mViewPagerHeight);
-        calculatePageLimitAndMargin(getContext());
-        setOffscreenPageLimit(mPageLimit);
-        setPageMargin(mPageMargin);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (mConfig.orientation == CarouselConfig.VERTICAL) {
+            setRotation(90);
+            // It's magic!
+            float offset = (mViewPagerWidth - mViewPagerHeight) * 0.5f;
+            setTranslationX(offset);
+            setTranslationY(-offset);
+
+            setMeasuredDimension(mViewPagerHeight, mViewPagerWidth);
+        } else {
+            setMeasuredDimension(mViewPagerWidth, mViewPagerHeight);
+        }
+
+        if (mConfig.orientation == CarouselConfig.VERTICAL) {
+            super.onMeasure(heightMeasureSpec, widthMeasureSpec);
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+
+        boolean result = calculatePageLimitAndMargin(getContext());
+        if (result) {
+            setOffscreenPageLimit(mConfig.pageLimit);
+            setPageMargin(mConfig.pageMargin);
+        }
 
         if (DEBUG) {
             Log.d(TAG, mConfig.toString());
         }
     }
 
-    private void calculatePageLimitAndMargin(Context context) {
-        int pageContentWidthId = mResources.getIdentifier("page_content_width", "dimen",
-                context.getPackageName());
-        int pageContentHeightId = mResources.getIdentifier("page_content_height", "dimen",
-                context.getPackageName());
+    private int getPageContentWidth(String packageName, Resources res) {
+        final int pageContentWidthId = res.getIdentifier("page_content_width", "dimen",
+                packageName);
+        return res.getDimensionPixelSize(pageContentWidthId);
+    }
+
+    private int getPageContentHeight(String packageName, Resources res) {
+        final int pageContentHeightId = res.getIdentifier("page_content_height", "dimen",
+                packageName);
+        return res.getDimensionPixelSize(pageContentHeightId);
+    }
+
+    private boolean calculatePageLimitAndMargin(Context context) {
+        if (mViewPagerWidth == 0 || mViewPagerHeight == 0) {
+            return false;
+        }
 
         int contentSize, viewSize;
         if (mConfig.orientation == CarouselConfig.HORIZONTAL) {
-            contentSize = mResources.getDimensionPixelSize(pageContentWidthId);
+            contentSize = getPageContentWidth(context.getPackageName(), mResources);
             viewSize = mViewPagerWidth;
         } else {
-            contentSize = mResources.getDimensionPixelSize(pageContentHeightId);
+            contentSize = getPageContentHeight(context.getPackageName(), mResources);
             viewSize = mViewPagerHeight;
         }
 
@@ -272,18 +294,26 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         if (contentSize + 2*minOffset > viewSize) {
-            Log.w(TAG, "Page content is too large.");
-            return;
+            if (DEBUG) {
+                Log.d(TAG, "Page content is too large.");
+            }
+            return false;
         }
 
-        final float step = 0.1f;
-        while (contentSize + 2*contentSize*(mSidePagesVisiblePart -step) + 2*minOffset > viewSize
-                && Math.abs(mSidePagesVisiblePart -step) > 1e-6) {
-            mSidePagesVisiblePart -= step;
+        while (true) {
+            if (mSidePagesVisiblePart < 0.0f) {
+                mSidePagesVisiblePart = 0.0f;
+                break;
+            }
+            if (contentSize + 2*contentSize*(mSidePagesVisiblePart) + 2*minOffset <= viewSize) {
+                break;
+            }
+            mSidePagesVisiblePart -= 0.1f;
         }
 
-        int fullPages = 0;
+        int fullPages = 1;
         final int s = viewSize - (int) (2*contentSize* mSidePagesVisiblePart);
+
         while (minOffset + (fullPages+1)*(contentSize + minOffset) <= s) {
             fullPages++;
         }
@@ -293,21 +323,18 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         int offset = (s - fullPages * contentSize) / (fullPages + 1);
+        int pageLimit;
         if (Math.abs(mSidePagesVisiblePart) > 1e-6) {
-            mPageLimit = (fullPages + 2) - 1;
+            pageLimit = (fullPages + 2) - 1;
         } else {
-            mPageLimit = fullPages - 1;
+            pageLimit = fullPages - 1;
         }
         // Reserve pages for correct scrolling
-        mPageLimit = 2*mPageLimit + mPageLimit / 2;
-        mConfig.pageLimit = mPageLimit;
+        pageLimit = 2*pageLimit + pageLimit / 2;
+        mConfig.pageLimit = pageLimit;
 
-        if (mConfig.orientation == CarouselConfig.VERTICAL) {
-            mPageMargin = -(int) ((viewSize - contentSize - offset) * mConfig.scaleY);
-        } else {
-            mPageMargin = -(viewSize - contentSize - offset);
-        }
-        mConfig.pageMargin = mPageMargin;
+        mConfig.pageMargin = -(viewSize - contentSize - offset);
+        return true;
     }
 
     public static class CarouselState extends BaseSavedState {

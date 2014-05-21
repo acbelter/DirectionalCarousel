@@ -202,7 +202,7 @@ public class CarouselPagerAdapter<T extends Parcelable> extends FragmentPagerAda
     }
 
     private PageLayout getPageView(int position) {
-        String tag = CarouselConfig.getInstance().getPageFragmentTag(position);
+        String tag = mConfig.getPageFragmentTag(position);
         Fragment f = mFragmentManager.findFragmentByTag(tag);
         if (f != null && f.getView() != null) {
             return (PageLayout) ((ViewGroup) f.getView()).getChildAt(0);

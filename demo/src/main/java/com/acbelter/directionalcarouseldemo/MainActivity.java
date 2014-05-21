@@ -13,24 +13,35 @@ import java.util.ArrayList;
 public class MainActivity extends FragmentActivity implements OnPageClickListener<MyPageItem> {
     private CarouselPagerAdapter<MyPageItem> mPagerAdapter;
     private CarouselViewPager mViewPager;
+    private ArrayList<MyPageItem> mItems;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final int size = 20;
-        ArrayList<MyPageItem> items = new ArrayList<MyPageItem>(size);
-        for (int i = 0; i < size; i++) {
-            items.add(new MyPageItem("Item " + i));
+        if (savedInstanceState == null) {
+            int size = 20;
+            mItems = new ArrayList<MyPageItem>(size);
+            for (int i = 0; i < size; i++) {
+                mItems.add(new MyPageItem("Item " + i));
+            }
+        } else {
+            mItems = savedInstanceState.getParcelableArrayList("items");
         }
 
         mViewPager = (CarouselViewPager) findViewById(R.id.carousel_pager);
         mPagerAdapter = new CarouselPagerAdapter<MyPageItem>(getSupportFragmentManager(),
-                MyPageFragment.class, R.layout.page_layout, items);
+                MyPageFragment.class, R.layout.page_layout, mItems);
         mPagerAdapter.setOnPageClickListener(this);
 
         mViewPager.setAdapter(mPagerAdapter);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("items", mItems);
     }
 
     @Override
