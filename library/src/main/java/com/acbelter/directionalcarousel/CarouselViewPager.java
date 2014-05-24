@@ -45,6 +45,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     // Distance between pages always will be greater than this value (even when scaling)
     private int mMinPagesOffset;
     private float mSidePagesVisiblePart;
+    private int mWrapPadding;
 
     private Resources mResources;
     private CarouselConfig mConfig;
@@ -99,6 +100,8 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 mSidePagesVisiblePart =
                         a.getFloat(R.styleable.CarouselViewPager_sidePagesVisiblePart,
                                 DEFAULT_SIDE_PAGES_VISIBLE_PART);
+                mWrapPadding = (int) a.getDimension(R.styleable.CarouselViewPager_wrapPadding,
+                        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, dm));
             }
         } finally {
             if (a != null) {
@@ -211,32 +214,41 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mViewPagerWidth = MeasureSpec.getSize(widthMeasureSpec);
-        mViewPagerHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
         if (DEBUG) {
-            Log.d(TAG, "w=" + mViewPagerWidth + " h=" + mViewPagerHeight);
+            Log.d(TAG, "w=" + width + " h=" + height);
+            Log.d(TAG, "wMode=" + getModeDescription(widthMode) +
+                    " hMode=" + getModeDescription(heightMode));
         }
 
         if (mConfig.orientation == CarouselConfig.VERTICAL) {
+            // FIXME Supports only match_parent attributes
             setRotation(90);
-            // Some magic...
-            float offset = (mViewPagerWidth - mViewPagerHeight) * 0.5f;
-            setTranslationX(offset);
-            setTranslationY(-offset);
+            setTranslationX((width - height) * 0.5f);
+            setTranslationY(-(width-height)*0.5f);
 
-            setMeasuredDimension(mViewPagerHeight, mViewPagerWidth);
-        } else {
-            setMeasuredDimension(mViewPagerWidth, mViewPagerHeight);
-        }
-
-        if (mConfig.orientation == CarouselConfig.VERTICAL) {
             super.onMeasure(heightMeasureSpec, widthMeasureSpec);
         } else {
+//            int pageContentHeight = getPageContentHeight(getContext().getPackageName(),
+//                    mResources);
+//            if (heightMode == MeasureSpec.AT_MOST ||
+//                    pageContentHeight + 2*mWrapPadding > mViewPagerHeight) {
+//
+//                mViewPagerHeight = pageContentHeight + 2*mWrapPadding;
+//                heightMeasureSpec = MeasureSpec.makeMeasureSpec(mViewPagerHeight, heightMode);
+//            }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
-        boolean result = calculatePageLimitAndMargin(getContext());
+        mViewPagerWidth = getMeasuredWidth();
+        mViewPagerHeight = getMeasuredHeight();
+
+        boolean result = calculatePageLimitAndMargin(getContext().getPackageName());
         if (result) {
             setOffscreenPageLimit(mConfig.pageLimit);
             setPageMargin(mConfig.pageMargin);
@@ -245,6 +257,22 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         if (DEBUG) {
             Log.d(TAG, mConfig.toString());
         }
+    }
+
+    private String getModeDescription(int mode) {
+        if (mode == MeasureSpec.AT_MOST) {
+            return "AT_MOST";
+        }
+
+        if (mode == MeasureSpec.EXACTLY) {
+            return "EXACTLY";
+        }
+
+        if (mode == MeasureSpec.UNSPECIFIED) {
+            return  "UNSPECIFIED";
+        }
+
+        return "UNKNOWN";
     }
 
     private int getPageContentWidth(String packageName, Resources res) {
@@ -260,23 +288,22 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     }
 
     /**
-     * @param context Context.
+     * @param packageName Package name.
      * @return True, if config was successfully updated.
      */
-    private boolean calculatePageLimitAndMargin(Context context) {
+    private boolean calculatePageLimitAndMargin(String packageName) {
         if (mViewPagerWidth == 0 || mViewPagerHeight == 0) {
             return false;
         }
 
-        int contentSize, viewSize;
+        int contentSize;
         if (mConfig.orientation == CarouselConfig.HORIZONTAL) {
-            contentSize = getPageContentWidth(context.getPackageName(), mResources);
-            viewSize = mViewPagerWidth;
+            contentSize = getPageContentWidth(packageName, mResources);
         } else {
-            contentSize = getPageContentHeight(context.getPackageName(), mResources);
-            viewSize = mViewPagerHeight;
+            contentSize = getPageContentHeight(packageName, mResources);
         }
 
+        int viewSize = mViewPagerWidth;
         int minOffset = 0;
         switch (mConfig.scrollScalingMode) {
             case CarouselConfig.SCROLL_MODE_BIG_CURRENT: {
@@ -329,7 +356,11 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         if (Math.abs(mSidePagesVisiblePart) > 1e-6) {
             pageLimit = (fullPages + 2) - 1;
         } else {
-            pageLimit = fullPages - 1;
+            if (fullPages > 1) {
+                pageLimit = fullPages - 1;
+            } else {
+                pageLimit = 1;
+            }
         }
         // Reserve pages for correct scrolling
         pageLimit = 2*pageLimit + pageLimit / 2;

@@ -148,12 +148,15 @@ public class CarouselPagerAdapter<T extends Parcelable> extends FragmentPagerAda
     public void onPageSelected(int position) {
         mCurrentPosition = position;
         int scalingPages = CarouselConfig.getInstance().pageLimit;
-        if (scalingPages == 0) {
-            return;
-        }
 
+        // Fix fast scroll scaling bug
         if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_CURRENT) {
-            // Fix fast scroll scaling bug
+            scaleAdjacentPages(position, scalingPages, mConfig.smallScale);
+        } else  if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
+            PageLayout current = getPageView(position);
+            if (current != null) {
+                current.setScaleBoth(mConfig.bigScale);
+            }
             scaleAdjacentPages(position, scalingPages, mConfig.smallScale);
         } else if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_NONE) {
             scaleAdjacentPages(position, scalingPages, mConfig.bigScale);

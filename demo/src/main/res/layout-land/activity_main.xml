@@ -8,23 +8,12 @@
               android:orientation="horizontal"
               tools:context=".MainActivity">
 
-    <View
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
-      android:layout_weight="1"/>
-
     <com.acbelter.directionalcarousel.CarouselViewPager
       android:id="@+id/carousel_pager"
-      android:layout_width="0dp"
+      android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout_weight="1"
       android:background="@android:color/black"
       android:orientation="vertical"
-      carousel:infinite="false"
+      carousel:infinite="true"
       carousel:scrollScalingMode="bigAll"/>
-
-    <View
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
-      android:layout_weight="1"/>
 </LinearLayout>

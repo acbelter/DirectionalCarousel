@@ -23,6 +23,7 @@
         <attr name="smallScale" format="float"/>
         <attr name="minPagesOffset" format="dimension"/>
         <attr name="sidePagesVisiblePart" format="float"/>
+        <attr name="wrapPadding" format="dimension"/>
     </declare-styleable>
 
     <attr name="scrollScalingMode" format="enum">

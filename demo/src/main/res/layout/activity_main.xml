@@ -5,26 +5,15 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical"
+              android:orientation="horizontal"
               tools:context=".MainActivity">
-
-    <View
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"/>
 
     <com.acbelter.directionalcarousel.CarouselViewPager
       android:id="@+id/carousel_pager"
       android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
+      android:layout_height="match_parent"
       android:background="@android:color/black"
-      android:orientation="horizontal"
+      android:orientation="vertical"
       carousel:infinite="true"
-      carousel:scrollScalingMode="bigCurrent"/>
-
-    <View
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"/>
+      carousel:scrollScalingMode="bigAll"/>
 </LinearLayout>
