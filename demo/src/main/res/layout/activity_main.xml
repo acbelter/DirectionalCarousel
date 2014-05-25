@@ -10,10 +10,11 @@
 
     <com.acbelter.directionalcarousel.CarouselViewPager
       android:id="@+id/carousel_pager"
-      android:layout_width="match_parent"
+      android:layout_width="wrap_content"
       android:layout_height="match_parent"
       android:background="@android:color/black"
       android:orientation="vertical"
+      android:layout_gravity="center"
       carousel:infinite="true"
       carousel:scrollScalingMode="bigAll"/>
 </LinearLayout>

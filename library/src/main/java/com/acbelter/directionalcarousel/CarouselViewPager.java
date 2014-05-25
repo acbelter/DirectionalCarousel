@@ -30,9 +30,11 @@ import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.LinearLayout;
 
 public class CarouselViewPager extends ViewPager implements OnTouchListener {
     public static final float DEFAULT_SIDE_PAGES_VISIBLE_PART = 0.5f;
@@ -46,6 +48,9 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     private int mMinPagesOffset;
     private float mSidePagesVisiblePart;
     private int mWrapPadding;
+
+    private int mMeasurementCounter;
+    private float gravityOffset;
 
     private Resources mResources;
     private CarouselConfig mConfig;
@@ -212,10 +217,12 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         return mGestureDetector.onTouchEvent(e);
     }
 
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
+        mMeasurementCounter++;
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
 
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -226,22 +233,47 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                     " hMode=" + getModeDescription(heightMode));
         }
 
+        // FIXME Supports only match_parent and wrap_content attributes
         if (mConfig.orientation == CarouselConfig.VERTICAL) {
-            // FIXME Supports only match_parent attributes
-            setRotation(90);
-            setTranslationX((width - height) * 0.5f);
-            setTranslationY(-(width-height)*0.5f);
+            int pageContentWidth = getPageContentWidth(getContext().getPackageName(),
+                    mResources);
+            int newWidth = width;
+            if (widthMode == MeasureSpec.AT_MOST ||
+                    pageContentWidth + 2 * mWrapPadding > width) {
+
+                newWidth = pageContentWidth + 2 * mWrapPadding;
+                widthMeasureSpec = MeasureSpec.makeMeasureSpec(newWidth, widthMode);
+            }
+
+            if (getLayoutParams() instanceof LinearLayout.LayoutParams) {
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) getLayoutParams();
+                if (mMeasurementCounter != 2) {
+                    gravityOffset = 0.0f;
+                    if (params.gravity == Gravity.CENTER_HORIZONTAL ||
+                            params.gravity == Gravity.CENTER) {
+                        gravityOffset = (width - newWidth) * 0.5f;
+                    }
+                } else {
+                    mMeasurementCounter = 0;
+                }
+
+                setRotation(90);
+                setTranslationX((newWidth - height) * 0.5f + gravityOffset);
+                setTranslationY(-(newWidth - height) * 0.5f);
+                params.gravity = Gravity.NO_GRAVITY;
+                setLayoutParams(params);
+            }
 
             super.onMeasure(heightMeasureSpec, widthMeasureSpec);
         } else {
-//            int pageContentHeight = getPageContentHeight(getContext().getPackageName(),
-//                    mResources);
-//            if (heightMode == MeasureSpec.AT_MOST ||
-//                    pageContentHeight + 2*mWrapPadding > mViewPagerHeight) {
-//
-//                mViewPagerHeight = pageContentHeight + 2*mWrapPadding;
-//                heightMeasureSpec = MeasureSpec.makeMeasureSpec(mViewPagerHeight, heightMode);
-//            }
+            int pageContentHeight = getPageContentHeight(getContext().getPackageName(),
+                    mResources);
+            if (heightMode == MeasureSpec.AT_MOST ||
+                    pageContentHeight + 2*mWrapPadding > height) {
+
+                int newHeight = pageContentHeight + 2*mWrapPadding;
+                heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeight, heightMode);
+            }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
