@@ -27,14 +27,11 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.GestureDetector;
+import android.view.*;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 public class CarouselViewPager extends ViewPager implements OnTouchListener {
     public static final float DEFAULT_SIDE_PAGES_VISIBLE_PART = 0.5f;
@@ -49,7 +46,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     private float mSidePagesVisiblePart;
     private int mWrapPadding;
 
-    private int mMeasurementCounter;
+    private boolean mSizeChanged;
     private float gravityOffset;
 
     private Resources mResources;
@@ -62,6 +59,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
     public CarouselViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
+
         mConfig = CarouselConfig.getInstance();
         mConfig.pagerId = getId();
         mResources = context.getResources();
@@ -217,10 +215,14 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         return mGestureDetector.onTouchEvent(e);
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mSizeChanged = true;
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mMeasurementCounter++;
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int height = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -233,7 +235,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                     " hMode=" + getModeDescription(heightMode));
         }
 
-        // FIXME Supports only match_parent and wrap_content attributes
+        // FIXME Supported only match_parent and wrap_content attributes
         if (mConfig.orientation == CarouselConfig.VERTICAL) {
             int pageContentWidth = getPageContentWidth(getContext().getPackageName(),
                     mResources);
@@ -245,16 +247,16 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 widthMeasureSpec = MeasureSpec.makeMeasureSpec(newWidth, widthMode);
             }
 
-            if (getLayoutParams() instanceof LinearLayout.LayoutParams) {
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) getLayoutParams();
-                if (mMeasurementCounter != 2) {
+            ViewGroup.LayoutParams lp = getLayoutParams();
+            // FIXME Supported only FrameLayout as parent
+            if (lp instanceof FrameLayout.LayoutParams) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) lp;
+                if (!mSizeChanged) {
                     gravityOffset = 0.0f;
                     if (params.gravity == Gravity.CENTER_HORIZONTAL ||
                             params.gravity == Gravity.CENTER) {
                         gravityOffset = (width - newWidth) * 0.5f;
                     }
-                } else {
-                    mMeasurementCounter = 0;
                 }
 
                 setRotation(90);
@@ -262,6 +264,9 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 setTranslationY(-(newWidth - height) * 0.5f);
                 params.gravity = Gravity.NO_GRAVITY;
                 setLayoutParams(params);
+            } else {
+                throw new UnsupportedOperationException("Parent layout must be instance of " +
+                        "FrameLayout.");
             }
 
             super.onMeasure(heightMeasureSpec, widthMeasureSpec);
