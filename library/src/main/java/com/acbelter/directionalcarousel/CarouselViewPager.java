@@ -250,12 +250,20 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
             ViewGroup.LayoutParams lp = getLayoutParams();
             // FIXME Supported only FrameLayout as parent
             if (lp instanceof FrameLayout.LayoutParams) {
+                if (!parentHasExactDimensions()) {
+                    throw new UnsupportedOperationException("Parent layout should have exact " +
+                            "dimensions.");
+                }
+
                 FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) lp;
                 if (!mSizeChanged) {
                     gravityOffset = 0.0f;
-                    if (params.gravity == Gravity.CENTER_HORIZONTAL ||
-                            params.gravity == Gravity.CENTER) {
+                    int hGrav = params.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+                    if (hGrav == Gravity.CENTER_HORIZONTAL || hGrav == Gravity.CENTER) {
                         gravityOffset = (width - newWidth) * 0.5f;
+                    }
+                    if (hGrav == Gravity.RIGHT) {
+                        gravityOffset = width - newWidth;
                     }
                 }
 
@@ -265,7 +273,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 params.gravity = Gravity.NO_GRAVITY;
                 setLayoutParams(params);
             } else {
-                throw new UnsupportedOperationException("Parent layout must be instance of " +
+                throw new UnsupportedOperationException("Parent layout should be instance of " +
                         "FrameLayout.");
             }
 
@@ -279,6 +287,18 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 int newHeight = pageContentHeight + 2*mWrapPadding;
                 heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeight, heightMode);
             }
+
+            // FIXME Supported only FrameLayout as parent
+            if (!(getLayoutParams() instanceof FrameLayout.LayoutParams)) {
+                throw new UnsupportedOperationException("Parent layout should be instance of " +
+                        "FrameLayout.");
+            } else {
+                if (!parentHasExactDimensions()) {
+                    throw new UnsupportedOperationException("Parent layout should have exact " +
+                            "dimensions.");
+                }
+            }
+
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
@@ -294,6 +314,15 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         if (DEBUG) {
             Log.d(TAG, mConfig.toString());
         }
+    }
+
+    private boolean parentHasExactDimensions() {
+        ViewGroup.LayoutParams params = ((ViewGroup) getParent()).getLayoutParams();
+        if (params.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
+                params.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            return false;
+        }
+        return true;
     }
 
     private String getModeDescription(int mode) {
