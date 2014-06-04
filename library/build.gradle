@@ -1,7 +1,7 @@
 apply plugin: 'android-library'
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 17
     buildToolsVersion "19.0.0"
 
     defaultConfig {
