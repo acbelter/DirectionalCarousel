@@ -8,13 +8,14 @@
   android:orientation="vertical"
   android:gravity="center">
 
-    <LinearLayout
+    <com.acbelter.directionalcarousel.fglayout.ForegroundLinearLayout
       android:id="@+id/page_content"
       android:layout_width="@dimen/page_content_width"
       android:layout_height="@dimen/page_content_height"
       android:clickable="true"
       android:gravity="center"
-      android:background="@drawable/item_selector">
+      android:background="@android:color/darker_gray"
+      android:foreground="@drawable/item_selector">
 
         <TextView
           android:id="@+id/title"
@@ -23,5 +24,5 @@
           android:textSize="20sp"
           android:gravity="center"
           tools:text="Title"/>
-    </LinearLayout>
+    </com.acbelter.directionalcarousel.fglayout.ForegroundLinearLayout>
 </com.acbelter.directionalcarousel.page.PageLayout>

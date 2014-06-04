@@ -5,5 +5,4 @@
           android:drawable="@color/select_color"/>
     <item android:state_focused="true"
           android:drawable="@color/select_color"/>
-    <item android:drawable="@android:color/darker_gray"/>
 </selector>

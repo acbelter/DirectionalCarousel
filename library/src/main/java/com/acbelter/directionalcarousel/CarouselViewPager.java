@@ -57,15 +57,29 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
     private View mTouchedView;
     private Parcelable mTouchedItem;
 
+    private final String mPackageName;
+    private int mPageContentWidthId;
+    private int mPageContentHeightId;
+
     public CarouselViewPager(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public CarouselViewPager(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
 
         mConfig = CarouselConfig.getInstance();
         mConfig.pagerId = getId();
         mResources = context.getResources();
+        mPackageName = context.getPackageName();
+        mPageContentWidthId = mResources.getIdentifier("page_content_width", "dimen",
+                mPackageName);
+        mPageContentHeightId = mResources.getIdentifier("page_content_height", "dimen",
+                mPackageName);
 
         DisplayMetrics dm = mResources.getDisplayMetrics();
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarouselViewPager);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarouselViewPager,
+                defStyle, 0);
         try {
             if (a != null) {
                 mConfig.orientation = a.getInt(R.styleable.CarouselViewPager_android_orientation,
@@ -237,8 +251,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
         // FIXME Supported only match_parent and wrap_content attributes
         if (mConfig.orientation == CarouselConfig.VERTICAL) {
-            int pageContentWidth = getPageContentWidth(getContext().getPackageName(),
-                    mResources);
+            int pageContentWidth = getPageContentWidth();
             int newWidth = width;
             if (widthMode == MeasureSpec.AT_MOST ||
                     pageContentWidth + 2 * mWrapPadding > width) {
@@ -279,8 +292,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
             super.onMeasure(heightMeasureSpec, widthMeasureSpec);
         } else {
-            int pageContentHeight = getPageContentHeight(getContext().getPackageName(),
-                    mResources);
+            int pageContentHeight = getPageContentHeight();
             if (heightMode == MeasureSpec.AT_MOST ||
                     pageContentHeight + 2*mWrapPadding > height) {
 
@@ -305,8 +317,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         mViewPagerWidth = getMeasuredWidth();
         mViewPagerHeight = getMeasuredHeight();
 
-        boolean result = calculatePageLimitAndMargin(getContext().getPackageName());
-        if (result) {
+        if (calculatePageLimitAndMargin()) {
             setOffscreenPageLimit(mConfig.pageLimit);
             setPageMargin(mConfig.pageMargin);
         }
@@ -318,11 +329,8 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
     private boolean parentHasExactDimensions() {
         ViewGroup.LayoutParams params = ((ViewGroup) getParent()).getLayoutParams();
-        if (params.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
-                params.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            return false;
-        }
-        return true;
+        return !(params.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
+                params.height == ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     private String getModeDescription(int mode) {
@@ -341,32 +349,27 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         return "UNKNOWN";
     }
 
-    private int getPageContentWidth(String packageName, Resources res) {
-        final int pageContentWidthId = res.getIdentifier("page_content_width", "dimen",
-                packageName);
-        return res.getDimensionPixelSize(pageContentWidthId);
+    private int getPageContentWidth() {
+        return mResources.getDimensionPixelSize(mPageContentWidthId);
     }
 
-    private int getPageContentHeight(String packageName, Resources res) {
-        final int pageContentHeightId = res.getIdentifier("page_content_height", "dimen",
-                packageName);
-        return res.getDimensionPixelSize(pageContentHeightId);
+    private int getPageContentHeight() {
+        return mResources.getDimensionPixelSize(mPageContentHeightId);
     }
 
     /**
-     * @param packageName Package name.
      * @return True, if config was successfully updated.
      */
-    private boolean calculatePageLimitAndMargin(String packageName) {
+    private boolean calculatePageLimitAndMargin() {
         if (mViewPagerWidth == 0 || mViewPagerHeight == 0) {
             return false;
         }
 
         int contentSize;
         if (mConfig.orientation == CarouselConfig.HORIZONTAL) {
-            contentSize = getPageContentWidth(packageName, mResources);
+            contentSize = getPageContentWidth();
         } else {
-            contentSize = getPageContentHeight(packageName, mResources);
+            contentSize = getPageContentHeight();
         }
 
         int viewSize = mViewPagerWidth;

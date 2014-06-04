@@ -25,8 +25,18 @@ import com.acbelter.directionalcarousel.CarouselConfig;
 public class PageLayout extends LinearLayout {
     private float mScale = CarouselConfig.getInstance().bigScale;
 
+    public PageLayout(Context context) {
+        super(context);
+        setWillNotDraw(false);
+    }
+
     public PageLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setWillNotDraw(false);
+    }
+
+    public PageLayout(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
         setWillNotDraw(false);
     }
 

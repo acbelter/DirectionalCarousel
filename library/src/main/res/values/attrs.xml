@@ -31,4 +31,12 @@
         <enum name="bigAll" value="1"/>
         <enum name="none" value="2"/>
     </attr>
+
+    <declare-styleable name="ForegroundLinearLayout">
+        <attr name="android:foreground"/>
+    </declare-styleable>
+
+    <declare-styleable name="ForegroundRelativeLayout">
+        <attr name="android:foreground"/>
+    </declare-styleable>
 </resources>
