@@ -23,7 +23,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
+
 import com.acbelter.directionalcarousel.page.OnPageClickListener;
 import com.acbelter.directionalcarousel.page.PageFragment;
 import com.acbelter.directionalcarousel.page.PageLayout;
@@ -152,7 +152,7 @@ public class CarouselPagerAdapter<T extends Parcelable> extends FragmentPagerAda
         // Fix fast scroll scaling bug
         if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_CURRENT) {
             scaleAdjacentPages(position, scalingPages, mConfig.smallScale);
-        } else  if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
+        } else if (mConfig.scrollScalingMode == CarouselConfig.SCROLL_MODE_BIG_ALL) {
             PageLayout current = getPageView(position);
             if (current != null) {
                 current.setScaleBoth(mConfig.bigScale);
@@ -164,10 +164,10 @@ public class CarouselPagerAdapter<T extends Parcelable> extends FragmentPagerAda
     }
 
     /**
-     * @param position Position of the current page.
+     * @param position     Position of the current page.
      * @param scalingPages The number of pages on both sides of the current page,
      *                     which must be scaled.
-     * @param scale Scale value.
+     * @param scale        Scale value.
      */
     private void scaleAdjacentPages(int position, int scalingPages, float scale) {
         if (scalingPages == 0) {
@@ -208,7 +208,7 @@ public class CarouselPagerAdapter<T extends Parcelable> extends FragmentPagerAda
         String tag = mConfig.getPageFragmentTag(position);
         Fragment f = mFragmentManager.findFragmentByTag(tag);
         if (f != null && f.getView() != null) {
-            return (PageLayout) ((ViewGroup) f.getView()).getChildAt(0);
+            return (PageLayout) f.getView();
         }
         return null;
     }

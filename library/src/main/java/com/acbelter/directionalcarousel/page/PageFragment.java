@@ -22,13 +22,14 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.acbelter.directionalcarousel.CarouselConfig;
 import com.acbelter.directionalcarousel.CarouselViewPager;
 
 public abstract class PageFragment<T extends Parcelable> extends Fragment {
     /**
      * @param pageLayout Layout of page.
-     * @param pageItem Item for customize page content view.
+     * @param pageItem   Item for customize page content view.
      * @return View of page content.
      */
     public abstract View setupPage(PageLayout pageLayout, T pageItem);

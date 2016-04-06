@@ -27,10 +27,14 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 public class CarouselViewPager extends ViewPager implements OnTouchListener {
@@ -88,7 +92,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                         a.getBoolean(R.styleable.CarouselViewPager_infinite, true);
                 mConfig.scrollScalingMode =
                         a.getInt(R.styleable.CarouselViewPager_scrollScalingMode,
-                        CarouselConfig.SCROLL_MODE_BIG_CURRENT);
+                                CarouselConfig.SCROLL_MODE_BIG_CURRENT);
 
                 float bigScale = a.getFloat(R.styleable.CarouselViewPager_bigScale,
                         CarouselConfig.DEFAULT_BIG_SCALE);
@@ -290,13 +294,14 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                         "FrameLayout.");
             }
 
+            mSizeChanged = true;
             super.onMeasure(heightMeasureSpec, widthMeasureSpec);
         } else {
             int pageContentHeight = getPageContentHeight();
             if (heightMode == MeasureSpec.AT_MOST ||
-                    pageContentHeight + 2*mWrapPadding > height) {
+                    pageContentHeight + 2 * mWrapPadding > height) {
 
-                int newHeight = pageContentHeight + 2*mWrapPadding;
+                int newHeight = pageContentHeight + 2 * mWrapPadding;
                 heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeight, heightMode);
             }
 
@@ -311,6 +316,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 }
             }
 
+            mSizeChanged = true;
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
@@ -343,7 +349,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
         }
 
         if (mode == MeasureSpec.UNSPECIFIED) {
-            return  "UNSPECIFIED";
+            return "UNSPECIFIED";
         }
 
         return "UNKNOWN";
@@ -391,7 +397,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
             }
         }
 
-        if (contentSize + 2*minOffset > viewSize) {
+        if (contentSize + 2 * minOffset > viewSize) {
             if (DEBUG) {
                 Log.d(TAG, "Page content is too large.");
             }
@@ -403,16 +409,16 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
                 mSidePagesVisiblePart = 0.0f;
                 break;
             }
-            if (contentSize + 2*contentSize*(mSidePagesVisiblePart) + 2*minOffset <= viewSize) {
+            if (contentSize + 2 * contentSize * (mSidePagesVisiblePart) + 2 * minOffset <= viewSize) {
                 break;
             }
             mSidePagesVisiblePart -= 0.1f;
         }
 
         int fullPages = 1;
-        final int s = viewSize - (int) (2*contentSize* mSidePagesVisiblePart);
+        final int s = viewSize - (int) (2 * contentSize * mSidePagesVisiblePart);
 
-        while (minOffset + (fullPages+1)*(contentSize + minOffset) <= s) {
+        while (minOffset + (fullPages + 1) * (contentSize + minOffset) <= s) {
             fullPages++;
         }
 
@@ -432,7 +438,7 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
             }
         }
         // Reserve pages for correct scrolling
-        pageLimit = 2*pageLimit + pageLimit / 2;
+        pageLimit = 2 * pageLimit + pageLimit / 2;
         mConfig.pageLimit = pageLimit;
 
         mConfig.pageMargin = -(viewSize - contentSize - offset);
@@ -457,16 +463,16 @@ public class CarouselViewPager extends ViewPager implements OnTouchListener {
 
         public static final Parcelable.Creator<CarouselState> CREATOR =
                 new Parcelable.Creator<CarouselState>() {
-            @Override
-            public CarouselState createFromParcel(Parcel in) {
-                return new CarouselState(in);
-            }
+                    @Override
+                    public CarouselState createFromParcel(Parcel in) {
+                        return new CarouselState(in);
+                    }
 
-            @Override
-            public CarouselState[] newArray(int size) {
-                return new CarouselState[0];
-            }
-        };
+                    @Override
+                    public CarouselState[] newArray(int size) {
+                        return new CarouselState[0];
+                    }
+                };
 
         @Override
         public void writeToParcel(Parcel out, int flags) {

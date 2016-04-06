@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
+
 import com.acbelter.directionalcarousel.R;
 
 public class ForegroundLinearLayout extends LinearLayout {

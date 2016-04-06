@@ -52,7 +52,8 @@ public class CarouselConfig implements Parcelable {
         return sConfig;
     }
 
-    private CarouselConfig() {}
+    private CarouselConfig() {
+    }
 
     private CarouselConfig(Parcel in) {
         orientation = in.readInt();
